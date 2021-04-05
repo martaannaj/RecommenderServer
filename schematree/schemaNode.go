@@ -55,7 +55,6 @@ func (node *SchemaNode) decodeGob(d *gob.Decoder, props []*IItem) error {
 	}
 
 	node.FirstChildren = new([3]SchemaNode)
-
 	for i := 0; i < length; i++ {
 		node.FirstChildren[i] = SchemaNode{nil, node, nil, nil, nil, 0}
 		err = node.FirstChildren[i].decodeGob(d, props)
@@ -69,6 +68,7 @@ func (node *SchemaNode) decodeGob(d *gob.Decoder, props []*IItem) error {
 	if err != nil {
 		return err
 	}
+
 	node.Children = make([]*SchemaNode, length, length)
 
 	for i := range node.Children {
