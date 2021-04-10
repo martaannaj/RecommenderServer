@@ -134,29 +134,3 @@ func (tree *SchemaTree) Support(properties IList) uint32 {
 
 	return support
 }
-
-// String returns the string represantation of the schema tree
-func (tree SchemaTree) String() string {
-	var minSupport uint32 = 100000
-	s := "digraph schematree { newrank=true; labelloc=b; color=blue; fontcolor=blue; style=dotted;\n"
-
-	s += tree.Root.graphViz(minSupport)
-
-	cluster := ""
-
-	for _, prop := range tree.PropMap {
-		cluster = ""
-		for node := prop.traversalPointer; node != nil; node = node.nextSameID {
-			if node.Support >= minSupport {
-				cluster += fmt.Sprintf("\"%p\"; ", node)
-			}
-		}
-		if cluster != "" {
-			s += fmt.Sprintf("subgraph \"cluster_%v\" { rank=same; label=\"%v\"; %v}\n", prop.Str, *prop.Str, cluster)
-		}
-	}
-
-	s += "\n"
-
-	return s + "}"
-}

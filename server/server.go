@@ -39,7 +39,7 @@ func setupLeanRecommender(
 
 		// Decode the JSON input and build a list of input strings
 		var input = RecommenderRequest{}
-		// var input []string
+
 		err := json.NewDecoder(req.Body).Decode(&input)
 		if err != nil {
 			res.Write([]byte("Malformed Request.")) // TODO: Json-Schema helps
@@ -70,55 +70,6 @@ func setupLeanRecommender(
 		// Write the recommendations as a JSON array.
 		res.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(res).Encode(recResp)
-	}
-}
-
-func setupLeanRecommender(
-	model *schematree.SchemaTree,
-	workflow *strategy.Workflow,
-	hardLimit int,
-) func(http.ResponseWriter, *http.Request) {
-
-	// Fetch the map of all properties in the SchemaTree
-	pMap := model.PropMap
-
-	return func(res http.ResponseWriter, req *http.Request) {
-
-		// Decode the JSON input and build a list of input strings
-		var properties []string
-		err := json.NewDecoder(req.Body).Decode(&properties)
-		if err != nil {
-			res.Write([]byte("Malformed Request. Expected an array of property IRIs"))
-			return
-		}
-		fmt.Println(properties)
-
-		// Match the input strings to build a list of input properties.
-		list := []*schematree.IItem{}
-		for _, pString := range properties {
-			p, ok := pMap[pString]
-			if ok {
-				list = append(list, p)
-			}
-		}
-		// fmt.Println(tree.Support(list), tree.Root.Support)
-
-		// Make an assessment of the input properties.
-		assessment := assessment.NewInstance(list, model, true)
-
-		// Make a recommendation based on the assessed input and chosen strategy.
-		t1 := time.Now()
-		rec := workflow.Recommend(assessment)
-		fmt.Println(time.Since(t1))
-
-		// Put a hard limit on the recommendations returned.
-		if len(rec) > 500 {
-			rec = rec[:500]
-		}
-
-		// Write the recommendations as a JSON array.
-		res.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(res).Encode(rec)
 	}
 }
 

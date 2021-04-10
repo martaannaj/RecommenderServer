@@ -109,38 +109,11 @@ func main() {
 	cmdRoot.PersistentFlags().StringVar(&traceFile, "trace", "", "write execution trace to `file`")
 	cmdRoot.PersistentFlags().BoolVarP(&measureTime, "time", "t", false, "measure time of command execution")
 
-	// subcommand visualize
-	cmdBuildDot := &cobra.Command{
-		Use:   "build-dot <tree>",
-		Short: "Build a DOT file from a schematree binary",
-		Long: "Load the schematree binary stored in path given by <tree> and build a DOT file using" +
-			" the GraphViz toolbox.\n" +
-			"Will create a file in the same directory as <tree>, with the name: '<tree>.dot'\n",
-		Args: cobra.ExactArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
-			treeBinary := &args[0]
-
-			// Load the schematree from the binary file.
-			schema, err := schematree.Load(*treeBinary)
-			if err != nil {
-				log.Panicln(err)
-			}
-
-			f, err := os.Create(*treeBinary + ".dot")
-			if err == nil {
-				defer f.Close()
-				f.WriteString(fmt.Sprint(schema))
-				fmt.Println("Run e.g. `dot -Tsvg tree.dot -o tree.svg` to visualize!")
-			}
-
-		},
-	}
-
 	// subcommand serve
 	cmdServe := &cobra.Command{
-		Use:   "serve <model> <glossary>",
+		Use:   "serve <model>",
 		Short: "Serve a SchemaTree model via an HTTP Server",
-		Long: "Load the <model> (schematree binary) and the <glossary> (glossary binary) and the recommendation" +
+		Long: "Load the <model> (schematree binary) and the recommendation" +
 			" endpoint using an HTTP Server.\nAvailable endpoints are stated in the server README.",
 		Args: cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
@@ -169,7 +142,6 @@ func main() {
 	}
 	cmdServe.Flags().IntVarP(&serveOnPort, "port", "p", 8080, "`port` of http server")
 
-	cmdRoot.AddCommand(cmdBuildDot)
 	cmdRoot.AddCommand(cmdServe)
 
 	// Start the CLI application
