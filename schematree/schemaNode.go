@@ -18,6 +18,7 @@ type SchemaNode struct {
 
 //newRootNode creates a new root node for a given propMap
 func newRootNode(pMap propMap) SchemaNode {
+	fmt.Println("ROOT NODE")
 	return SchemaNode{pMap.get("root"), nil, new([3]SchemaNode), []*SchemaNode{}, nil, 0}
 }
 
@@ -55,7 +56,6 @@ func (node *SchemaNode) decodeGob(d *gob.Decoder, props []*IItem) error {
 	}
 
 	node.FirstChildren = new([3]SchemaNode)
-
 	for i := 0; i < length; i++ {
 		node.FirstChildren[i] = SchemaNode{nil, node, nil, nil, nil, 0}
 		err = node.FirstChildren[i].decodeGob(d, props)
@@ -69,6 +69,7 @@ func (node *SchemaNode) decodeGob(d *gob.Decoder, props []*IItem) error {
 	if err != nil {
 		return err
 	}
+
 	node.Children = make([]*SchemaNode, length, length)
 
 	for i := range node.Children {
@@ -101,35 +102,4 @@ func (node *SchemaNode) prefixContains(propertyPath IList) bool {
 		}
 	}
 	return false
-}
-
-func (node *SchemaNode) graphViz(minSup uint32) string {
-	s := ""
-	// // draw horizontal links
-	// if node.nextSameID != nil && node.nextSameID.Support >= minSup {
-	//  s += fmt.Sprintf("%v -> %v  [color=blue];\n", node, node.nextSameID)
-	// }
-
-	// // draw types
-	// for k, v := range node.Types {
-	//  s += fmt.Sprintf("%v -> \"%v\" [color=red,label=%v];\n", node, *k.Str, v)
-	// }
-
-	// draw children
-	for _, child := range node.FirstChildren {
-		if child.Support >= minSup {
-			s += fmt.Sprintf("\"%p\" -> \"%p\" [label=%v;weight=%v];\n", node, &child, child.Support, child.ID.TotalCount)
-			s += child.graphViz(minSup)
-		}
-	}
-	if len(node.Children) > 0 {
-		for _, child := range node.Children {
-			if child.Support >= minSup {
-				s += fmt.Sprintf("\"%p\" -> \"%p\" [label=%v;weight=%v];\n", node, child, child.Support, child.ID.TotalCount)
-				s += child.graphViz(minSup)
-			}
-		}
-	}
-
-	return s
 }

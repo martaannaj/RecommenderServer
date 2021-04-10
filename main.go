@@ -2,9 +2,12 @@ package main
 
 import (
 	"RecommenderServer/schematree"
+	"RecommenderServer/server"
+	"RecommenderServer/strategy"
 	"bufio"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -22,12 +25,7 @@ func main() {
 	// Setup the variables where all flags will reside.
 	var cpuprofile, memprofile, traceFile string // used globally
 	var measureTime bool                         // used globally
-	// var firstNsubjects int64                     // used by build-tree
-	// var writeOutPropertyFreqs bool               // used by build-tree
-	// var serveOnPort int                          // used by serve
-	// var workflowFile string                      // used by serve
-	// var contiguousInput bool                     // used by split-dataset:by-type
-	// var everyNthSubject uint                     // used by split-dataset:1-in-n
+	var serveOnPort int                          // used by serve
 
 	// Setup helper variables
 	var timeCheckpoint time.Time // used globally
@@ -36,7 +34,7 @@ func main() {
 
 	// root command
 	cmdRoot := &cobra.Command{
-		Use: "recommender",
+		Use: "RecommenderServer",
 
 		// Execute global pre-run activities such as profiling.
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
@@ -111,37 +109,40 @@ func main() {
 	cmdRoot.PersistentFlags().StringVar(&traceFile, "trace", "", "write execution trace to `file`")
 	cmdRoot.PersistentFlags().BoolVarP(&measureTime, "time", "t", false, "measure time of command execution")
 
-	// subcommand visualize
-	cmdBuildDot := &cobra.Command{
-		Use:   "build-dot <tree>",
-		Short: "Build a DOT file from a schematree binary",
-		Long: "Load the schematree binary stored in path given by <tree> and build a DOT file using" +
-			" the GraphViz toolbox.\n" +
-			"Will create a file in the same directory as <tree>, with the name: '<tree>.dot'\n",
+	// subcommand serve
+	cmdServe := &cobra.Command{
+		Use:   "serve <model>",
+		Short: "Serve a SchemaTree model via an HTTP Server",
+		Long: "Load the <model> (schematree binary) and the recommendation" +
+			" endpoint using an HTTP Server.\nAvailable endpoints are stated in the server README.",
 		Args: cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			treeBinary := &args[0]
+			modelBinary := &args[0]
+			// glossaryBinary := &args[1]
 
 			// Load the schematree from the binary file.
-			schema, err := schematree.Load(*treeBinary)
+			model, err := schematree.Load(*modelBinary)
 			if err != nil {
 				log.Panicln(err)
 			}
-			// schematree.PrintMemUsage()
+			schematree.PrintMemUsage()
 
-			// Write the dot file and open it with visualizer.
-			// TODO: output a GraphViz visualization of the tree to `tree.png
-			// TODO: Println could show the real file name
-			f, err := os.Create(*treeBinary + ".dot")
-			if err == nil {
-				defer f.Close()
-				f.WriteString(fmt.Sprint(schema))
-				fmt.Println("Run e.g. `dot -Tsvg tree.dot -o tree.svg` to visualize!")
-			}
+			// read config file if given as parameter, test if everything needed is there, create a workflow
+			// if no config file is given, the standard recommender is set as workflow.
+			var workflow *strategy.Workflow
+			workflow = strategy.MakePresetWorkflow("direct", model)
+			fmt.Printf("Run Standard Recommender ")
 
+			// Initiate the HTTP server. Make it stop on <Enter> press.
+			router := server.SetupEndpoints(model, workflow, 500)
+
+			fmt.Printf("Now listening on 0.0.0.0:%v\n", serveOnPort)
+			http.ListenAndServe(fmt.Sprintf("0.0.0.0:%v", serveOnPort), router)
 		},
 	}
-	cmdRoot.AddCommand(cmdBuildDot)
+	cmdServe.Flags().IntVarP(&serveOnPort, "port", "p", 8080, "`port` of http server")
+
+	cmdRoot.AddCommand(cmdServe)
 
 	// Start the CLI application
 	cmdRoot.Execute()

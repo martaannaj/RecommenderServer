@@ -86,11 +86,15 @@ func (tree *SchemaTree) RecommendProperty(properties IList) (ranked PropertyReco
 
 		var makeCandidates func(startNode *SchemaNode)
 		makeCandidates = func(startNode *SchemaNode) { // head hunter function ;)
-			for _, child := range startNode.FirstChildren {
-				if child.ID.IsProp() {
-					candidates[child.ID] += child.Support
+			if startNode.FirstChildren != nil {
+				for _, child := range startNode.FirstChildren {
+					if child.ID != nil {
+						if child.ID.IsProp() {
+							candidates[child.ID] += child.Support
+						}
+					}
+					makeCandidates(&child)
 				}
-				makeCandidates(&child)
 			}
 			for _, child := range startNode.Children {
 				if child.ID.IsProp() {
@@ -212,48 +216,3 @@ func (tree *SchemaTree) RecommendPropertiesAndTypes(properties IList) (ranked Pr
 
 	return
 }
-
-// func (tree *schemaTree) recommendType(properties iList) typeRecommendations {
-// 	var setSupport uint32
-// 	//tree.root.support // empty set occured in all transactions
-
-// 	properties.sort() // descending by support
-
-// 	pSet := properties.toSet()
-
-// 	candidates := make(map[*iItem]uint32)
-
-// 	var makeCandidates func(startNode *SchemaNode)
-// 	makeCandidates = func(startNode *SchemaNode) { // head hunter function ;)
-// 		for _, child := range startNode.children {
-// 			candidates[child.ID] += child.support
-// 			makeCandidates(child)
-// 		}
-// 	}
-
-// 	// walk from each leaf towards root...l
-// 	for leaf := properties[len(properties)-1].traversalPointer; leaf != nil; leaf = leaf.nextSameID {
-// 		if leaf.prefixContains(&properties) {
-// 			setSupport += leaf.support // number of occuences of this set of properties in the current branch
-// 			for cur := leaf; cur.parent != nil; cur = cur.parent {
-// 				if !(pSet[cur.ID]) {
-// 					candidates[cur.ID] += leaf.support
-// 				}
-// 			}
-// 			makeCandidates(leaf)
-// 		}
-// 	}
-
-// 	// TODO: If there are no candidates, consider doing (n-1)-gram smoothing over property subsets
-
-// 	// now that all candidates have been collected, rank them
-// 	ranked := make([]rankedCandidate, 0, len(candidates))
-// 	for candidate, support := range candidates {
-// 		ranked = append(ranked, rankedCandidate{candidate, float64(support) / float64(setSupport)})
-// 	}
-
-// 	// sort descending by support
-// 	sort.Slice(ranked, func(i, j int) bool { return ranked[i].probability > ranked[j].probability })
-
-// 	return ranked
-// }
