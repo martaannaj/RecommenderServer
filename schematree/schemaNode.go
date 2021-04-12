@@ -2,7 +2,6 @@ package schematree
 
 import (
 	"encoding/gob"
-	"fmt"
 	"sync"
 )
 
@@ -18,7 +17,6 @@ type SchemaNode struct {
 
 //newRootNode creates a new root node for a given propMap
 func newRootNode(pMap propMap) SchemaNode {
-	fmt.Println("ROOT NODE")
 	return SchemaNode{pMap.get("root"), nil, new([3]SchemaNode), []*SchemaNode{}, nil, 0}
 }
 
