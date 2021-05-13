@@ -9,7 +9,7 @@ import (
 type SchemaNode struct {
 	ID            *IItem
 	parent        *SchemaNode
-	FirstChildren *[3]SchemaNode
+	FirstChildren [3]*SchemaNode
 	Children      []*SchemaNode
 	nextSameID    *SchemaNode // node traversal pointer
 	Support       uint32      // total frequency of the node in the path
@@ -17,7 +17,7 @@ type SchemaNode struct {
 
 //newRootNode creates a new root node for a given propMap
 func newRootNode(pMap propMap) SchemaNode {
-	return SchemaNode{pMap.get("root"), nil, new([3]SchemaNode), []*SchemaNode{}, nil, 0}
+	return SchemaNode{pMap.get("root"), nil, [3]*SchemaNode{}, []*SchemaNode{}, nil, 0}
 }
 
 const lockPrime = 97 // arbitrary prime number
@@ -53,9 +53,8 @@ func (node *SchemaNode) decodeGob(d *gob.Decoder, props []*IItem) error {
 		return err
 	}
 
-	node.FirstChildren = new([3]SchemaNode)
 	for i := 0; i < length; i++ {
-		node.FirstChildren[i] = SchemaNode{nil, node, nil, nil, nil, 0}
+		node.FirstChildren[i] = &SchemaNode{nil, node, [3]*SchemaNode{}, nil, nil, 0}
 		err = node.FirstChildren[i].decodeGob(d, props)
 
 		if err != nil {
@@ -71,7 +70,7 @@ func (node *SchemaNode) decodeGob(d *gob.Decoder, props []*IItem) error {
 	node.Children = make([]*SchemaNode, length, length)
 
 	for i := range node.Children {
-		node.Children[i] = &SchemaNode{nil, node, nil, nil, nil, 0}
+		node.Children[i] = &SchemaNode{nil, node, [3]*SchemaNode{}, nil, nil, 0}
 		err = node.Children[i].decodeGob(d, props)
 
 		if err != nil {

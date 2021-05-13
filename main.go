@@ -143,7 +143,6 @@ func main() {
 	cmdServe.Flags().IntVarP(&serveOnPort, "port", "p", 8080, "`port` of http server")
 
 	cmdRoot.AddCommand(cmdServe)
-
 	// Start the CLI application
 	cmdRoot.Execute()
 }
