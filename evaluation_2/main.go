@@ -23,7 +23,7 @@ func main() {
 	configPath := flag.String("workflow", "", "Path to workflow config file for single evaluation")
 	testFile := flag.String("testSet", "", "the file to parse")
 	typedEntities := flag.Bool("typed", false, "Use type information or not")
-	handlerType := flag.String("handler", "takeOneButType", "Choose the handler: takeOneButType, takeAllButBest, takeMoreButCommon")
+	handlerType := flag.String("handler", "handlerAll", "Choose the handler: takeOneButType, takeAllButBest, takeMoreButCommon")
 	groupBy := flag.String("groupBy", "setSize", "Choose groupBy: setSize, numTypes, numLeftOut, numNonTypes")
 	writeResults := flag.Bool("results", false, "Turn on to write an additional JSON file with all evaluation results")
 	loadResults := flag.Bool("loadResults", false, "Turn on to read results back from JSON file instead of running the actual evaluation")

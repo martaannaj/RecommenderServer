@@ -4,7 +4,7 @@ import "RecommenderServer/schematree"
 
 type handlerFunc func(*schematree.SubjectSummary, func(schematree.IList) *evalResult) []*evalResult
 
-func handler(
+func handlerAll(
 	summary *schematree.SubjectSummary,
 	evaluator func(schematree.IList) *evalResult,
 ) []*evalResult {

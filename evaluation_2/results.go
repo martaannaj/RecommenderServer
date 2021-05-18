@@ -15,18 +15,11 @@ import (
 )
 
 type evalResult struct {
-	setSize    uint16 // number of properties used to generate recommendations (both type and non-type)
-	numTypes   uint16 // number of type properties in both reduced and leftout property sets
-	numLeftOut uint16 // number of properties that have been left out an needed to be recommended back
-	rank       uint32 // rank calculated for recommendation, equal to lec(recommendations)+1 if not fully recommendated back
-	numTP      uint32 // confusion matrix - number of left out properties that have been recommended
-	numTPAtL   uint32 // number of left out properties that have been recommended until position L, where L is numLeftOut
-	numFP      uint32 // confusion matrix - number of recommendations that have not been left out
-	numTN      uint32 // confusion matrix - number of properties that have neither been recommended or left out
-	numFN      uint32 // confusion matrix - number of properties that are left out but have not been recommended
-	duration   int64  // duration (in nanoseconds) of how long the recommendation took
-	group      uint16 // extra value that can store values like custom-made groups
-	note       string // @TODO: Temporarily added to aid in evaluation debugging
+	setSize  uint16 // number of properties used to generate recommendations (both type and non-type)
+	numTypes uint16 // number of type properties in both reduced and leftout property sets
+	duration int64  // duration (in nanoseconds) of how long the recommendation took
+	group    uint16 // extra value that can store values like custom-made groups
+	note     string // @TODO: Temporarily added to aid in evaluation debugging
 }
 
 // evaluatePair will generate an evalResult for a pair of ( reducedProps , leftoutProps ).
@@ -109,7 +102,7 @@ func evaluateDataset(
 
 	// Depending on the evaluation method, we will use a different handler
 	var handler handlerFunc
-	handler = handler
+	handler = handlerAll
 
 	// We also construct the method that will evaluate a pair of property sets.
 	evaluator := func(reduced schematree.IList) *evalResult {
