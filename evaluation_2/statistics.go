@@ -7,10 +7,9 @@ import (
 )
 
 type evalSummary struct {
-	groupBy      int16
-	rankIfHitAvg float64
-	duration     float64
-	subjects     int64
+	groupBy  int16
+	duration float64
+	subjects int64
 }
 
 // makeStatics receive a list of evaluation results and makes a summary of them.
@@ -49,10 +48,9 @@ func makeStatistics(results []evalResult, groupBy string) (statistics []evalSumm
 		}
 
 		newStat := evalSummary{
-			groupBy:      int16(index),
-			rankIfHitAvg: 500, // set to max by default
-			duration:     float64(Duration) / float64(resCount),
-			subjects:     int64(resCount),
+			groupBy:  int16(index),
+			duration: float64(Duration) / float64(resCount),
+			subjects: int64(resCount),
 		}
 
 		statistics = append(statistics, newStat)
