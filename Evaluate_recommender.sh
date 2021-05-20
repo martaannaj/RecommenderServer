@@ -21,6 +21,6 @@ cd RecommenderServer
 go build .
 cd evaluation
 go build .
-$BIN $COMMON $TYPEDBACKOFFTREE $TAKEITER $BYSETSIZE -name two-nodes-typed-tooFewRecs-takeMoreButCommon-setSize
+$BIN $COMMON $TYPEDBACKOFFTREE $TAKEITER $BYSETSIZE -name three-nodes-typed-tooFewRecs-takeMoreButCommon-setSize
 
-$BIN $COMMON $TYPEDBACKOFFTREE $TAKEITER $BYNONTYPES -name two-nodes-typed-tooFewRecs-takeMoreButCommon-byNonTypes
+$BIN $COMMON $TYPEDBACKOFFTREE $TAKEITER $BYNONTYPES -name three-nodes-typed-tooFewRecs-takeMoreButCommon-byNonTypes
