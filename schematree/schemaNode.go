@@ -62,7 +62,7 @@ func (node *SchemaNode) decodeGob(d *gob.Decoder, props []*IItem) error {
 	}
 
 	for i := 0; i < length; i++ {
-		node.FirstChildren[i] = &SchemaNode{nil, node, [3]*SchemaNode{}, nil, nil, 0}
+		node.FirstChildren[i] = &SchemaNode{nil, node, [firstChildren]*SchemaNode{}, nil, nil, 0}
 		err = node.FirstChildren[i].decodeGob(d, props)
 
 		if err != nil {
@@ -73,7 +73,7 @@ func (node *SchemaNode) decodeGob(d *gob.Decoder, props []*IItem) error {
 	node.Children = make([]*SchemaNode, remainder, remainder)
 
 	for i := 0; i < remainder; i++ {
-		node.Children[i] = &SchemaNode{nil, node, [3]*SchemaNode{}, nil, nil, 0}
+		node.Children[i] = &SchemaNode{nil, node, [firstChildren]*SchemaNode{}, nil, nil, 0}
 		err = node.Children[i].decodeGob(d, props)
 
 		if err != nil {
