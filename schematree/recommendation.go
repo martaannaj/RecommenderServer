@@ -88,7 +88,7 @@ func (tree *SchemaTree) RecommendProperty(properties IList) (ranked PropertyReco
 		makeCandidates = func(startNode *SchemaNode) { // head hunter function ;)
 			for _, child := range startNode.FirstChildren {
 				if child == nil {
-					break
+					return
 				}
 				if child.ID.IsProp() {
 					candidates[child.ID] += child.Support
@@ -164,7 +164,7 @@ func (tree *SchemaTree) RecommendPropertiesAndTypes(properties IList) (ranked Pr
 		makeCandidates = func(startNode *SchemaNode) { // head hunter function ;)
 			for _, child := range startNode.FirstChildren {
 				if child == nil {
-					break
+					return
 				}
 				candidates[child.ID] += child.Support
 				makeCandidates(child)
