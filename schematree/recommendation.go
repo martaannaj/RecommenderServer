@@ -113,15 +113,6 @@ func (tree *SchemaTree) RecommendProperty(properties IList) (ranked PropertyReco
 			}
 			makeCandidates(child)
 
-			for _, child := range startNode.FirstChildren {
-				if child == nil {
-					return
-				}
-				if child.ID.IsProp() {
-					candidates[child.ID] += child.Support
-				}
-				makeCandidates(child)
-			}
 			for _, child := range startNode.Children {
 				if child.ID.IsProp() {
 					candidates[child.ID] += child.Support
