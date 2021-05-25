@@ -1,0 +1,8 @@
+version: '3'
+services:
+  recommenderserver:
+    image: docker.io/martaannaj/recommenderserver:latest
+    expose: 
+      - "8771"
+    ports:
+      - "8771:8771"

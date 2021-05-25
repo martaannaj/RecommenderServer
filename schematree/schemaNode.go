@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-const firstChildren = 3
+const firstChildren = 1
 
 // SchemaNode is a nodes of the Schema FP-Tree
 type SchemaNode struct {

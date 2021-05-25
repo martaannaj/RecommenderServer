@@ -1,6 +1,7 @@
 package main
 
 import (
+	"RecommenderServer/configuration"
 	"RecommenderServer/schematree"
 	"RecommenderServer/server"
 	"RecommenderServer/strategy"
@@ -26,6 +27,7 @@ func main() {
 	var cpuprofile, memprofile, traceFile string // used globally
 	var measureTime bool                         // used globally
 	var serveOnPort int                          // used by serve
+	var workflowFile string                      // used by serve
 
 	// Setup helper variables
 	var timeCheckpoint time.Time // used globally
@@ -130,8 +132,24 @@ func main() {
 			// read config file if given as parameter, test if everything needed is there, create a workflow
 			// if no config file is given, the standard recommender is set as workflow.
 			var workflow *strategy.Workflow
-			workflow = strategy.MakePresetWorkflow("direct", model)
-			fmt.Printf("Run Standard Recommender ")
+			if workflowFile != "" {
+				config, err := configuration.ReadConfigFile(&workflowFile)
+				if err != nil {
+					log.Panicln(err)
+				}
+				err = config.Test()
+				if err != nil {
+					log.Panicln(err)
+				}
+				workflow, err = configuration.ConfigToWorkflow(config, model)
+				if err != nil {
+					log.Panicln(err)
+				}
+				log.Printf("Run Config Workflow %v", workflowFile)
+			} else {
+				workflow = strategy.MakePresetWorkflow("direct", model)
+				fmt.Printf("Run Standard Recommender ")
+			}
 
 			// Initiate the HTTP server. Make it stop on <Enter> press.
 			router := server.SetupEndpoints(model, workflow, 500)
@@ -141,6 +159,7 @@ func main() {
 		},
 	}
 	cmdServe.Flags().IntVarP(&serveOnPort, "port", "p", 8080, "`port` of http server")
+	cmdServe.Flags().StringVarP(&workflowFile, "workflow", "w", "./configuration/Workflow.json", "`path` to config file that defines the workflow")
 
 	cmdRoot.AddCommand(cmdServe)
 	// Start the CLI application

@@ -77,6 +77,6 @@ func setupLeanRecommender(
 // func SetupEndpoints(model *schematree.SchemaTree, glossary *glossary.Glossary, workflow *strategy.Workflow, hardLimit int) http.Handler {
 func SetupEndpoints(model *schematree.SchemaTree, workflow *strategy.Workflow, hardLimit int) http.Handler {
 	router := http.NewServeMux()
-	router.HandleFunc("/lean-recommender", setupLeanRecommender(model, workflow, hardLimit))
+	router.HandleFunc("/recommender", setupLeanRecommender(model, workflow, hardLimit))
 	return router
 }
