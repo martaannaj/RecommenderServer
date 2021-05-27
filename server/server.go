@@ -42,7 +42,8 @@ func setupLeanRecommender(
 
 		err := json.NewDecoder(req.Body).Decode(&input)
 		if err != nil {
-			res.Write([]byte("Malformed Request.")) // TODO: Json-Schema helps
+			res.WriteHeader(400)
+			fmt.Println("Malformed Request.") // TODO: Json-Schema helps
 			return
 		}
 		fmt.Println(input)
