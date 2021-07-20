@@ -54,15 +54,33 @@ func setupLeanRecommender(
 		rec := workflow.Recommend(assessment)
 		fmt.Println(time.Since(t1))
 
-		// Put a hard limit on the recommendations returned.
-		if len(rec) > hardLimit {
-			rec = rec[:hardLimit]
+		// Put a hard limit on the recommendations returned
+		propsCount := 0
+		limit := 0
+		for i, rec := range rec {
+			if rec.Property.IsProp() {
+				propsCount += 1
+				if propsCount >= hardLimit {
+					limit = i
+					break
+				}
+			}
+		}
+		if limit == 0 {
+			limit = len(rec) - 1
+		}
+		if len(rec) > limit {
+			rec = rec[:limit]
 		}
 
-		outputRecs := make([]RecommendationOutputEntry, len(rec), len(rec))
-		for i, rec := range rec {
-			outputRecs[i].PropertyStr = rec.Property.Str
-			outputRecs[i].Probability = rec.Probability
+		outputRecs := make([]RecommendationOutputEntry, propsCount-1, propsCount-1)
+		i := 0
+		for _, rec := range rec {
+			if rec.Property.IsProp() {
+				outputRecs[i].PropertyStr = rec.Property.Str
+				outputRecs[i].Probability = rec.Probability
+				i += 1
+			}
 		}
 
 		// Pack everything into the response

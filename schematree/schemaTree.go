@@ -4,6 +4,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -44,7 +45,7 @@ func (tree *SchemaTree) init() {
 }
 
 // Load loads a binarized SchemaTree from disk
-func Load(filePath string) (*SchemaTree, error) {
+func Load(filePath string, stripURI bool) (*SchemaTree, error) {
 	// Alternatively via GobDecoder(...): https://stackoverflow.com/a/12854659
 
 	fmt.Printf("Loading schema (from file %v): ", filePath)
@@ -74,6 +75,19 @@ func Load(filePath string) (*SchemaTree, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if stripURI {
+		for i, prop := range props {
+			uri := strings.Split(*prop.Str, "/")
+			if strings.HasPrefix(*prop.Str, "t#") {
+				typeValue := "t#" + uri[len(uri)-1]
+				props[i].Str = &typeValue
+			} else {
+				props[i].Str = &uri[len(uri)-1]
+			}
+		}
+	}
+
 	for sortOrder, item := range props {
 		item.SortOrder = uint32(sortOrder)
 		tree.PropMap[*item.Str] = item

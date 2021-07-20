@@ -28,6 +28,7 @@ func main() {
 	var measureTime bool                         // used globally
 	var serveOnPort int                          // used by serve
 	var workflowFile string                      // used by serve
+	var stripURIs bool                           // used globally
 
 	// Setup helper variables
 	var timeCheckpoint time.Time // used globally
@@ -123,7 +124,7 @@ func main() {
 			// glossaryBinary := &args[1]
 
 			// Load the schematree from the binary file.
-			model, err := schematree.Load(*modelBinary)
+			model, err := schematree.Load(*modelBinary, stripURIs)
 			if err != nil {
 				log.Panicln(err)
 			}
@@ -160,6 +161,7 @@ func main() {
 	}
 	cmdServe.Flags().IntVarP(&serveOnPort, "port", "p", 8080, "`port` of http server")
 	cmdServe.Flags().StringVarP(&workflowFile, "workflow", "w", "./configuration/Workflow.json", "`path` to config file that defines the workflow")
+	cmdServe.Flags().BoolVarP(&stripURIs, "stripURI", "s", true, "flag set to true if the recommendations should be served without URIs")
 
 	cmdRoot.AddCommand(cmdServe)
 	// Start the CLI application
