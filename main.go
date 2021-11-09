@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"runtime"
@@ -120,11 +121,22 @@ func main() {
 			" endpoint using an HTTP Server.\nAvailable endpoints are stated in the server README.",
 		Args: cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			modelBinary := &args[0]
+			modelBinary := args[0]
+			modelBinary = filepath.Clean(modelBinary)
 			// glossaryBinary := &args[1]
 
 			// Load the schematree from the binary file.
-			model, err := schematree.Load(*modelBinary, stripURIs)
+
+			fmt.Printf("Loading schema (from file %v): ", modelBinary)
+
+			/// file handling
+			f, err := os.Open(modelBinary)
+			if err != nil {
+				fmt.Printf("Encountered error while trying to open the file: %v\n", err)
+				log.Panic(err)
+			}
+
+			model, err := schematree.Load(f, stripURIs)
 			if err != nil {
 				log.Panicln(err)
 			}

@@ -2,11 +2,21 @@ package backoff
 
 import (
 	ST "RecommenderServer/schematree"
+	"os"
 	"testing"
 )
 
+func getTestSchema(t *testing.T, file_name string) (*ST.SchemaTree, error) {
+	f, err := os.Open(file_name)
+	if err != nil {
+		t.Errorf("Encountered error while trying to open the file: %v\n", err)
+	}
+	return ST.Load(f, false)
+}
+
 func TestRecommender(t *testing.T) {
-	schema, err := ST.Load(treePath, false)
+
+	schema, err := getTestSchema(t, treePath)
 
 	if err != nil {
 		t.Errorf("Schematree could not be loaded")
@@ -25,8 +35,7 @@ func TestRecommender(t *testing.T) {
 }
 
 func TestAvgMerger(t *testing.T) {
-
-	schema, err := ST.Load(treePath, false)
+	schema, err := getTestSchema(t, treePath)
 
 	if err != nil {
 		t.Errorf("Schematree could not be loaded")
@@ -61,8 +70,7 @@ func TestAvgMerger(t *testing.T) {
 }
 
 func TestMaxMerger(t *testing.T) {
-
-	schema, err := ST.Load(treePath, false)
+	schema, err := getTestSchema(t, treePath)
 
 	if err != nil {
 		t.Errorf("Schematree could not be loaded")
