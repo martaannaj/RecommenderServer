@@ -88,7 +88,7 @@ func (inst *Instance) GetWikiRecs(Properties []string) schematree.PropertyRecomm
 
 	var res *http.Response
 	var err error
-	for { // retry like a maniac
+	for { // retry to get the recommendations until either the http library returns an error, or we get a 200 response code
 		res, err = netClient.Get(url)
 		if err != nil {
 			panic(err)
