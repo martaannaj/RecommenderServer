@@ -122,15 +122,15 @@ func main() {
 		Args: cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			modelBinary := args[0]
-			modelBinary = filepath.Clean(modelBinary)
+			cleanedmodelBinary := filepath.Clean(modelBinary)
 			// glossaryBinary := &args[1]
 
 			// Load the schematree from the binary file.
 
-			fmt.Printf("Loading schema (from file %v): ", modelBinary)
+			fmt.Printf("Loading schema (from file %v): ", cleanedmodelBinary)
 
 			/// file handling
-			f, err := os.Open(modelBinary)
+			f, err := os.Open(cleanedmodelBinary)
 			if err != nil {
 				fmt.Printf("Encountered error while trying to open the file: %v\n", err)
 				log.Panic(err)
