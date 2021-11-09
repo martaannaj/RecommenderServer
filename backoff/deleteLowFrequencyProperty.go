@@ -28,18 +28,12 @@ var StepsizeLinear = func(size, iterator, parallelExecutions int) int {
 
 func MakeMoreThanInternalCondition(threshold int) InternalCondition {
 	return func(recs *ST.PropertyRecommendations) bool {
-		if len(*recs) > threshold {
-			return true
-		}
-		return false
+		return len(*recs) > threshold
 	}
 }
 func MakeMoreThanProbabilityInternalCondition(threshold float32) InternalCondition {
 	return func(recs *ST.PropertyRecommendations) bool {
-		if recs.Top10AvgProbibility() > threshold {
-			return true
-		}
-		return false
+		return recs.Top10AvgProbibility() > threshold
 	}
 }
 
@@ -71,8 +65,8 @@ func (strat *BackoffDeleteLowFrequencyItems) split(propertyList ST.IList) (subli
 	propertyList.Sort()
 
 	// Create sublists and removelists to track the created sublists and what was removed
-	sublists = make([]ST.IList, strat.parallelExecutions, strat.parallelExecutions)
-	removelists = make([]ST.IList, strat.parallelExecutions, strat.parallelExecutions)
+	sublists = make([]ST.IList, strat.parallelExecutions)
+	removelists = make([]ST.IList, strat.parallelExecutions)
 
 	//create the subsets according to the sebsize function. When the stepsize exeeded the limit of the list no sublist for that stepsize will be constructed.
 	for i := 0; i < strat.parallelExecutions; i++ {
@@ -93,7 +87,7 @@ func (strat *BackoffDeleteLowFrequencyItems) split(propertyList ST.IList) (subli
 func (strat *BackoffDeleteLowFrequencyItems) manipulate(propertyList ST.IList, i int) (reducedPropertyList, removedPropertyList ST.IList, err error) {
 	if len(propertyList) < i {
 		reducedPropertyList = nil
-		err = errors.New("Invalid manipulation of the property list since property list is too short")
+		err = errors.New("invalid manipulation of the property list since property list is too short")
 	} else {
 		reducedPropertyList = propertyList[:len(propertyList)-i]
 		removedPropertyList = propertyList[len(propertyList)-i:]

@@ -42,8 +42,7 @@ func (tree *SchemaTree) Recommend(properties []string, types []string) PropertyR
 	list := tree.BuildPropertyList(properties, types)
 
 	// Run the SchemaTree recommender
-	var candidates PropertyRecommendations
-	candidates = tree.RecommendProperty(list)
+	var candidates PropertyRecommendations = tree.RecommendProperty(list)
 
 	return candidates
 }
@@ -128,7 +127,7 @@ func (tree *SchemaTree) RecommendProperty(properties IList) (ranked PropertyReco
 		// now that all candidates have been collected, rank them
 		i := 0
 		setSup := float64(setSupport)
-		ranked = make([]RankedPropertyCandidate, len(candidates), len(candidates))
+		ranked = make([]RankedPropertyCandidate, len(candidates))
 		for candidate, support := range candidates {
 			ranked[i] = RankedPropertyCandidate{candidate, float64(support) / setSup}
 			i++
@@ -140,7 +139,7 @@ func (tree *SchemaTree) RecommendProperty(properties IList) (ranked PropertyReco
 		// TODO: Race condition on propMap: fatal error: concurrent map iteration and map write
 		// fmt.Println(tree.Root.Support)
 		setSup := float64(tree.Root.Support) // empty set occured in all transactions
-		ranked = make([]RankedPropertyCandidate, len(tree.PropMap), len(tree.PropMap))
+		ranked = make([]RankedPropertyCandidate, len(tree.PropMap))
 		for _, prop := range tree.PropMap {
 			ranked[int(prop.SortOrder)] = RankedPropertyCandidate{prop, float64(prop.TotalCount) / setSup}
 		}
@@ -197,7 +196,7 @@ func (tree *SchemaTree) RecommendPropertiesAndTypes(properties IList) (ranked Pr
 		// now that all candidates have been collected, rank them
 		i := 0
 		setSup := float64(setSupport)
-		ranked = make([]RankedPropertyCandidate, len(candidates), len(candidates))
+		ranked = make([]RankedPropertyCandidate, len(candidates))
 		for candidate, support := range candidates {
 			ranked[i] = RankedPropertyCandidate{candidate, float64(support) / setSup}
 			i++
@@ -209,7 +208,7 @@ func (tree *SchemaTree) RecommendPropertiesAndTypes(properties IList) (ranked Pr
 		// TODO: Race condition on propMap: fatal error: concurrent map iteration and map write
 		// fmt.Println(tree.Root.Support)
 		setSup := float64(tree.Root.Support) // empty set occured in all transactions
-		ranked = make([]RankedPropertyCandidate, len(tree.PropMap), len(tree.PropMap))
+		ranked = make([]RankedPropertyCandidate, len(tree.PropMap))
 		for _, prop := range tree.PropMap {
 			ranked[int(prop.SortOrder)] = RankedPropertyCandidate{prop, float64(prop.TotalCount) / setSup}
 		}
