@@ -14,5 +14,5 @@ If this issue is a (severe) security vulnerability or severe bug, please file an
 * Describe the issue, and provide details if possible (more instructions can be found on phabricator)
 * Add `Michaelcochez`, `Martaannaj` and `Wikidata` to the issue
 
-We aim to assess the report within a week and wil follow up on the phabricator ticket regarding next steps.
+We aim to assess the report within a week and will follow up on the phabricator ticket regarding next steps.
 
