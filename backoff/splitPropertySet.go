@@ -18,7 +18,7 @@ type BackoffSplitPropertySet struct {
 //splits into two sublists. "Equal" mixture of high and low support properties in both sets.
 var EverySecondItemSplitter = func(properties ST.IList) (sublists []ST.IList) {
 	properties.Sort()
-	sublists = make([]ST.IList, 2, 2)
+	sublists = make([]ST.IList, 2)
 	for i, p := range properties {
 		if i%2 == 0 {
 			sublists[0] = append(sublists[0], p)
@@ -32,7 +32,7 @@ var EverySecondItemSplitter = func(properties ST.IList) (sublists []ST.IList) {
 // splits the data set into two equally sized sublists, one containing all the high support properties, and one all the low support properties.
 var TwoSupportRangesSplitter = func(properties ST.IList) (sublists []ST.IList) {
 	properties.Sort()
-	sublists = make([]ST.IList, 2, 2)
+	sublists = make([]ST.IList, 2)
 	mid := int(float64(len(properties)) / 2.0)
 	sublists[0] = properties[mid:]
 	sublists[1] = properties[:mid]
@@ -121,12 +121,12 @@ func (strat *BackoffSplitPropertySet) Recommend(propertyList ST.IList) (ranked S
 // run several instances of the recommender in parallel on the sublists. Result are several recommendations
 func (strat *BackoffSplitPropertySet) recommendInPrallel(sublists []ST.IList) (recommendations []ST.PropertyRecommendations) {
 
-	recommendations = make([]ST.PropertyRecommendations, len(sublists), len(sublists))
+	recommendations = make([]ST.PropertyRecommendations, len(sublists))
 
 	// merge all other recommendations as 'removed recommendations'
 	// Maybe not the most efficient way...
 	mergeRemoved := func(sublists []ST.IList, current int) (merged ST.IList) {
-		merged = make(ST.IList, 0, 0)
+		merged = make(ST.IList, 0)
 		for i, list := range sublists {
 			// leave out currently views sublist
 			if i != current {

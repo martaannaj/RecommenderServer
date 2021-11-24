@@ -37,7 +37,7 @@ func TestAvgMerger(t *testing.T) {
 
 	prop1, _ := pMap["http://www.wikidata.org/prop/direct/P31"]
 	prop2, _ := pMap["http://www.wikidata.org/prop/direct/P21"]
-	prop3, _ := pMap["http://www.wikidata.org/prop/direct/P27"]
+	prop3, _:= pMap["http://www.wikidata.org/prop/direct/P27"]
 
 	rec1 := ST.PropertyRecommendations{ST.RankedPropertyCandidate{Property: prop1, Probability: 0.2}, ST.RankedPropertyCandidate{Property: prop2, Probability: 0.5}}
 	rec2 := ST.PropertyRecommendations{ST.RankedPropertyCandidate{Property: prop1, Probability: 0.8}, ST.RankedPropertyCandidate{Property: prop3, Probability: 0.4}}

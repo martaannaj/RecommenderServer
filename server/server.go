@@ -73,7 +73,7 @@ func setupLeanRecommender(
 			rec = rec[:limit]
 		}
 
-		outputRecs := make([]RecommendationOutputEntry, propsCount-1, propsCount-1)
+		outputRecs := make([]RecommendationOutputEntry, propsCount - 1)
 		i := 0
 		for _, rec := range rec {
 			if rec.Property.IsProp() {

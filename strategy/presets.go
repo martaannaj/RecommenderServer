@@ -34,10 +34,7 @@ func MakeBelowThresholdCondition(threshold int) Condition {
 func MakeTooManyRecommendationsCondition(threshold int) Condition {
 	return func(asm *assessment.Instance) bool {
 		recommendation := asm.CalcRecommendations()
-		if len(recommendation) > threshold {
-			return true
-		}
-		return false
+		return len(recommendation) > threshold
 	}
 }
 
@@ -45,10 +42,7 @@ func MakeTooManyRecommendationsCondition(threshold int) Condition {
 func MakeTooFewRecommendationsCondition(threshold int) Condition {
 	return func(asm *assessment.Instance) bool {
 		recommendation := asm.CalcRecommendations()
-		if len(recommendation) < threshold {
-			return true
-		}
-		return false
+		return len(recommendation) < threshold
 	}
 }
 
@@ -56,10 +50,7 @@ func MakeTooFewRecommendationsCondition(threshold int) Condition {
 func MakeTooUnlikelyRecommendationsCondition(threshold float32) Condition {
 	return func(asm *assessment.Instance) bool {
 		recommendation := asm.CalcRecommendations()
-		if recommendation.Top10AvgProbibility() < threshold {
-			return true
-		}
-		return false
+		return recommendation.Top10AvgProbibility() < threshold
 	}
 }
 

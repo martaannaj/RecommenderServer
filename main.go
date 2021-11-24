@@ -5,7 +5,6 @@ import (
 	"RecommenderServer/schematree"
 	"RecommenderServer/server"
 	"RecommenderServer/strategy"
-	"bufio"
 	"fmt"
 	"log"
 	"net/http"
@@ -66,7 +65,7 @@ func main() {
 
 			// measure time - start measuring the time
 			//   The measurements are done in such a way to not include the time for the profiles operations.
-			if measureTime == true {
+			if measureTime {
 				timeCheckpoint = time.Now()
 			}
 
@@ -76,7 +75,7 @@ func main() {
 		PersistentPostRun: func(cmd *cobra.Command, args []string) {
 
 			// measure time - stop time measurement and print the measurements
-			if measureTime == true {
+			if measureTime {
 				fmt.Println("Execution Time:", time.Since(timeCheckpoint))
 			}
 
@@ -168,13 +167,3 @@ func main() {
 	cmdRoot.Execute()
 }
 
-func waitForReturn() {
-	buf := bufio.NewReader(os.Stdin)
-	fmt.Print("> ")
-	sentence, err := buf.ReadBytes('\n')
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(string(sentence))
-	}
-}

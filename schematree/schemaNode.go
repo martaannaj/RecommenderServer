@@ -70,7 +70,7 @@ func (node *SchemaNode) decodeGob(d *gob.Decoder, props []*IItem) error {
 		}
 	}
 
-	node.Children = make([]*SchemaNode, remainder, remainder)
+	node.Children = make([]*SchemaNode, remainder)
 
 	for i := 0; i < remainder; i++ {
 		node.Children[i] = &SchemaNode{nil, node, [firstChildren]*SchemaNode{}, nil, nil, 0}

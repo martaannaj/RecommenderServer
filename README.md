@@ -16,7 +16,7 @@ Individual descriptions in subfolders.
 
 # Start the server 
 # (TODO: add information about workflow strategies)
-./RecommenderServer serve ./testdata/handcrafted-item-filtered-sorted.schemaTree.typed.bin
+./RecommenderServer serve ./testdata/latest-truthy-item-filtered-sorted.nt.gz.schemaTree.typed.bin
 
 # Test with a request 
 curl -d '{"properties":["local://prop/Color"],"types":[]}' http://localhost:8080/lean-recommender
