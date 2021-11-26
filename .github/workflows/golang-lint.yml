@@ -1,5 +1,7 @@
 name: golangci-lint
 on:
+  schedule:
+  - cron: "0 0 * * 0"
   push:
     tags:
       - v*

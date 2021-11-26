@@ -73,7 +73,7 @@ func setupLeanRecommender(
 			rec = rec[:limit]
 		}
 
-		outputRecs := make([]RecommendationOutputEntry, propsCount-1)
+		outputRecs := make([]RecommendationOutputEntry, propsCount - 1)
 		i := 0
 		for _, rec := range rec {
 			if rec.Property.IsProp() {
@@ -88,7 +88,11 @@ func setupLeanRecommender(
 
 		// Write the recommendations as a JSON array.
 		res.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(res).Encode(recResp)
+		err = json.NewEncoder(res).Encode(recResp)
+		if err != nil {
+			fmt.Println("Malformed Response.")
+			return
+		}
 	}
 }
 
