@@ -95,7 +95,10 @@ func main() {
 				if err := pprof.WriteHeapProfile(f); err != nil {
 					log.Fatal("could not write memory profile: ", err)
 				}
-				defer f.Close()
+				err = f.Close()
+				if err != nil {
+					log.Panic(err)
+				}
 			}
 
 			// write trace execution to file - stop tracing
