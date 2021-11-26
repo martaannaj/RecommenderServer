@@ -1,12 +1,11 @@
 package strategy
 
 import (
-	"RecommenderServer/assessment"
 	"RecommenderServer/schematree"
-	"testing"
 	"fmt"
-	"os"
 	"log"
+	"os"
+	"testing"
 )
 
 var treePath = "../testdata/10M.nt.gz.schemaTree.bin"
@@ -27,9 +26,9 @@ func TestConditions(t *testing.T) {
 	item1 := pMap["http://www.wikidata.org/prop/direct/P31"] // large number (1224) recommendations after executing on the schema tree ../testdata/10M.nt.gz.schemaTree.bin
 	item2 := pMap["http://www.wikidata.org/prop/direct/P21"] // small number (487)
 	// create assessments
-	asm1 := assessment.NewInstance(schematree.IList{item1}, schema, true)
-	asm2 := assessment.NewInstance(schematree.IList{item2}, schema, true)
-	asm21 := assessment.NewInstance(schematree.IList{item2, item1}, schema, true)
+	asm1 := schematree.NewInstance(schematree.IList{item1}, schema, true)
+	asm2 := schematree.NewInstance(schematree.IList{item2}, schema, true)
+	asm21 := schematree.NewInstance(schematree.IList{item2, item1}, schema, true)
 
 	// check all strategies
 	countTooLessProperties := MakeTooFewRecommendationsCondition(500)
