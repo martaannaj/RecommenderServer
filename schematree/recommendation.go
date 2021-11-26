@@ -43,7 +43,6 @@ func (tree *SchemaTree) Recommend(properties []string, types []string) PropertyR
 
 	// Run the SchemaTree recommender
 	var candidates PropertyRecommendations = tree.RecommendProperty(list)
-	// candidates = tree.RecommendProperty(list)
 
 	return candidates
 }

@@ -87,7 +87,7 @@ func (strat *BackoffDeleteLowFrequencyItems) split(propertyList ST.IList) (subli
 func (strat *BackoffDeleteLowFrequencyItems) manipulate(propertyList ST.IList, i int) (reducedPropertyList, removedPropertyList ST.IList, err error) {
 	if len(propertyList) < i {
 		reducedPropertyList = nil
-		err = errors.New("Invalid manipulation of the property list since property list is too short")
+		err = errors.New("invalid manipulation of the property list since property list is too short")
 	} else {
 		reducedPropertyList = propertyList[:len(propertyList)-i]
 		removedPropertyList = propertyList[len(propertyList)-i:]

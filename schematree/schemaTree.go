@@ -3,7 +3,7 @@ package schematree
 import (
 	"encoding/gob"
 	"fmt"
-	"os"
+	"io"
 	"strings"
 	"sync"
 	"time"
@@ -45,18 +45,12 @@ func (tree *SchemaTree) init() {
 }
 
 // Load loads a binarized SchemaTree from disk
-func Load(filePath string, stripURI bool) (*SchemaTree, error) {
+func Load(f io.Reader, stripURI bool) (*SchemaTree, error) {
+
+	// func Load(filePath string, stripURI bool) (*SchemaTree, error) {
 	// Alternatively via GobDecoder(...): https://stackoverflow.com/a/12854659
 
-	fmt.Printf("Loading schema (from file %v): ", filePath)
 	t1 := time.Now()
-
-	/// file handling
-	f, err := os.Open(filePath)
-	if err != nil {
-		fmt.Printf("Encountered error while trying to open the file: %v\n", err)
-		return nil, err
-	}
 
 	r, err := gzip.NewReader(f)
 	if err != nil {
