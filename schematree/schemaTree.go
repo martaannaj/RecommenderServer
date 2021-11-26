@@ -104,6 +104,10 @@ func Load(filePath string, stripURI bool) (*SchemaTree, error) {
 	fmt.Printf("decoding tree...")
 	err = tree.Root.decodeGob(d, props)
 
+	if err != nil {
+		return nil, err
+	}
+
 	// legacy import bug workaround
 	if *tree.Root.ID.Str != "root" {
 		fmt.Println("WARNING!!! Encountered legacy root node import bug - root node counts will be incorrect!")

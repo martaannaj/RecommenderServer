@@ -155,7 +155,10 @@ func main() {
 			router := server.SetupEndpoints(model, workflow, 500)
 
 			fmt.Printf("Now listening on 0.0.0.0:%v\n", serveOnPort)
-			http.ListenAndServe(fmt.Sprintf("0.0.0.0:%v", serveOnPort), router)
+			err = http.ListenAndServe(fmt.Sprintf("0.0.0.0:%v", serveOnPort), router)
+			if err != nil {
+				log.Panicln(err)
+			}
 		},
 	}
 	cmdServe.Flags().IntVarP(&serveOnPort, "port", "p", 8080, "`port` of http server")
@@ -164,6 +167,9 @@ func main() {
 
 	cmdRoot.AddCommand(cmdServe)
 	// Start the CLI application
-	cmdRoot.Execute()
+	err := cmdRoot.Execute()
+	if err != nil {
+		log.Panicln(err)
+	}
 }
 

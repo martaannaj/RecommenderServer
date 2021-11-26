@@ -58,7 +58,6 @@ func TestAvgMerger(t *testing.T) {
 			t.Errorf("Property 3 should have probability 0.1 but has %f", r.Probability)
 		}
 	}
-	return
 }
 
 func TestMaxMerger(t *testing.T) {
@@ -94,5 +93,4 @@ func TestMaxMerger(t *testing.T) {
 			t.Errorf("Property 3 should have probability 0.4 but has %f", r.Probability)
 		}
 	}
-	return
 }

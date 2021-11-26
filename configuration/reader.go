@@ -125,13 +125,15 @@ func (conf *Configuration) Test() (err error) {
 	for i, lay := range conf.Layers {
 		if lay.Backoff == "" {
 			err = errors.Errorf("Configuration File Failure: Layer %v Backoff Strategy is empty", i)
-			return
+			return err
 		}
 		if lay.Backoff == "splitProperty" && (lay.Merger == "" || lay.Splitter == "") {
 			err = errors.Errorf("Configuration File Failure: Layer %v needs splitter and merger", i)
+			return err
 		}
 		if lay.Backoff == "deleteLowFrequency" && (lay.Stepsize == "" || lay.ParallelExecutions == 0) {
 			err = errors.Errorf("Configuration File Failure: Layer %v needs Stepsize Function and #parallel executions", i)
+			return err
 		}
 	}
 	return nil

@@ -72,7 +72,7 @@ func (inst *Instance) CalcPropertyLength() int {
 // CalcRecommendations : Will execute the core schematree recommender on the properties and return
 // the list of recommendations. Cache-enabled operation.
 func (inst *Instance) CalcRecommendations() schematree.PropertyRecommendations {
-	if inst.useOptimisticCache == true {
+	if inst.useOptimisticCache {
 		if inst.cachedRecommendations == nil {
 			inst.cachedRecommendations = inst.tree.RecommendProperty(inst.Props)
 		}

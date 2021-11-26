@@ -54,7 +54,7 @@ func TestExecRecommender(t *testing.T) {
 	b.init(schema, 1, StepsizeLinear)
 	c := make(chan chanObject, 1)
 
-	prop1, - := pMap["http://www.wikidata.org/prop/direct/P31"]
+	prop1, _ := pMap["http://www.wikidata.org/prop/direct/P31"]
 	prop2, _ := pMap["http://www.wikidata.org/prop/direct/P21"]
 	prop3, _ := pMap["http://www.wikidata.org/prop/direct/P27"]
 	props := ST.IList{prop1, prop2, prop3}

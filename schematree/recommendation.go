@@ -42,8 +42,8 @@ func (tree *SchemaTree) Recommend(properties []string, types []string) PropertyR
 	list := tree.BuildPropertyList(properties, types)
 
 	// Run the SchemaTree recommender
-	var candidates PropertyRecommendations
-	candidates = tree.RecommendProperty(list)
+	var candidates PropertyRecommendations = tree.RecommendProperty(list)
+	// candidates = tree.RecommendProperty(list)
 
 	return candidates
 }

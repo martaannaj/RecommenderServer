@@ -88,7 +88,11 @@ func setupLeanRecommender(
 
 		// Write the recommendations as a JSON array.
 		res.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(res).Encode(recResp)
+		err = json.NewEncoder(res).Encode(recResp)
+		if err != nil {
+			fmt.Println("Malformed Response.")
+			return
+		}
 	}
 }
 
