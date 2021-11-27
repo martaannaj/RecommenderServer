@@ -12,15 +12,14 @@ package strategy
 //       assessment - creating it and then only delivering it to the strategy)
 
 import (
-	"RecommenderServer/assessment"
 	"RecommenderServer/schematree"
 )
 
 // Condition : Evaluates is a given strategy entry should run.
-type Condition func(*assessment.Instance) bool
+type Condition func(*schematree.Instance) bool
 
 // Procedure : Procedure to run as a strategy entry.
-type Procedure func(*assessment.Instance) schematree.PropertyRecommendations
+type Procedure func(*schematree.Instance) schematree.PropertyRecommendations
 
 type entry struct {
 	check Condition
@@ -39,7 +38,7 @@ func (wf *Workflow) Push(cond Condition, proc Procedure, desc string) {
 // Recommend : Run the workflow and return the recommended properties.
 // Go through the workflow and execute the first procedure that has a valid condition.
 // That procedure will return the list of recommended properties.
-func (wf *Workflow) Recommend(asm *assessment.Instance) schematree.PropertyRecommendations {
+func (wf *Workflow) Recommend(asm *schematree.Instance) schematree.PropertyRecommendations {
 	//log.Println("Starting the strategy workflow:")
 	for _, step := range *wf {
 		if step.check(asm) {

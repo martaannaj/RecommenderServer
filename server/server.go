@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"RecommenderServer/assessment"
 	"RecommenderServer/strategy"
 )
 
@@ -47,11 +46,11 @@ func setupLeanRecommender(
 			return
 		}
 		fmt.Println(input)
-		assessment := assessment.NewInstanceFromInput(input.Properties, input.Types, model, true)
+		instance := schematree.NewInstanceFromInput(input.Properties, input.Types, model, true)
 
 		// Make a recommendation based on the assessed input and chosen strategy.
 		t1 := time.Now()
-		rec := workflow.Recommend(assessment)
+		rec := workflow.Recommend(instance)
 		fmt.Println(time.Since(t1))
 
 		// Put a hard limit on the recommendations returned
@@ -73,7 +72,7 @@ func setupLeanRecommender(
 			rec = rec[:limit]
 		}
 
-		outputRecs := make([]RecommendationOutputEntry, propsCount - 1)
+		outputRecs := make([]RecommendationOutputEntry, propsCount-1)
 		i := 0
 		for _, rec := range rec {
 			if rec.Property.IsProp() {

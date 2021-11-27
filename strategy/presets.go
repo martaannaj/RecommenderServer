@@ -3,14 +3,13 @@ package strategy
 // This file is responsible for holding presets for strategy definitions.
 
 import (
-	"RecommenderServer/assessment"
 	"RecommenderServer/backoff"
 	"RecommenderServer/schematree"
 )
 
 // Helper method to create a condition that always evaluates to true.
 func MakeAlwaysCondition() Condition {
-	return func(asm *assessment.Instance) bool {
+	return func(asm *schematree.Instance) bool {
 		return true
 	}
 }
@@ -18,13 +17,13 @@ func MakeAlwaysCondition() Condition {
 //Not needed anylonger
 // Helper method to create the above-threshold condition.
 func MakeAboveThresholdCondition(threshold int) Condition {
-	return func(asm *assessment.Instance) bool {
+	return func(asm *schematree.Instance) bool {
 		return len(asm.Props) > threshold
 	}
 }
 
 func MakeBelowThresholdCondition(threshold int) Condition {
-	return func(asm *assessment.Instance) bool {
+	return func(asm *schematree.Instance) bool {
 		return len(asm.Props) < threshold
 	}
 }
@@ -32,7 +31,7 @@ func MakeBelowThresholdCondition(threshold int) Condition {
 //Not needed anylonger
 // Helper Method to create too-many-recommendations-condition: When the standard recommender returns more than count many recommendations the condition is true, else false
 func MakeTooManyRecommendationsCondition(threshold int) Condition {
-	return func(asm *assessment.Instance) bool {
+	return func(asm *schematree.Instance) bool {
 		recommendation := asm.CalcRecommendations()
 		return len(recommendation) > threshold
 	}
@@ -40,7 +39,7 @@ func MakeTooManyRecommendationsCondition(threshold int) Condition {
 
 // Helper Method to create too-few-recommendations-condition: When the standard recommender returns less than count many recommendations the condition is true, else false
 func MakeTooFewRecommendationsCondition(threshold int) Condition {
-	return func(asm *assessment.Instance) bool {
+	return func(asm *schematree.Instance) bool {
 		recommendation := asm.CalcRecommendations()
 		return len(recommendation) < threshold
 	}
@@ -48,7 +47,7 @@ func MakeTooFewRecommendationsCondition(threshold int) Condition {
 
 // Helper Method to create too-unlikely-recommendations-condition: When the standard recommender returns a recommendation where the top 10 has lower probability than threshhold (in decimal percentage eg 0.5)
 func MakeTooUnlikelyRecommendationsCondition(threshold float32) Condition {
-	return func(asm *assessment.Instance) bool {
+	return func(asm *schematree.Instance) bool {
 		recommendation := asm.CalcRecommendations()
 		return recommendation.Top10AvgProbibility() < threshold
 	}
@@ -56,14 +55,14 @@ func MakeTooUnlikelyRecommendationsCondition(threshold float32) Condition {
 
 // Helper method to create the direct SchemaTree procedure call.
 //func MakeDirectProcedure(tree *schematree.SchemaTree) Procedure {
-//	return func(asm *assessment.Instance) schematree.PropertyRecommendations {
+//	return func(asm *schematree.Instance) schematree.PropertyRecommendations {
 //		return tree.RecommendProperty(asm.Props)
 //	}
 //}
 
 // Helper method to create the direct SchemaTree procedure call.
 func MakeAssessmentAwareDirectProcedure() Procedure {
-	return func(asm *assessment.Instance) schematree.PropertyRecommendations {
+	return func(asm *schematree.Instance) schematree.PropertyRecommendations {
 		return asm.CalcRecommendations()
 	}
 }
@@ -71,7 +70,7 @@ func MakeAssessmentAwareDirectProcedure() Procedure {
 // Helper method to create the 'deletelowfrequency' backoff procedure.
 func MakeDeleteLowFrequencyProcedure(tree *schematree.SchemaTree, parExecs int, stepsize backoff.StepsizeFunc, condition backoff.InternalCondition) Procedure {
 	b := backoff.NewBackoffDeleteLowFrequencyItems(tree, parExecs, stepsize, condition)
-	return func(asm *assessment.Instance) schematree.PropertyRecommendations {
+	return func(asm *schematree.Instance) schematree.PropertyRecommendations {
 		return b.Recommend(asm.Props)
 	}
 }
@@ -79,7 +78,7 @@ func MakeDeleteLowFrequencyProcedure(tree *schematree.SchemaTree, parExecs int, 
 // Helper method to create the 'splitproperty' backoff procedure.
 func MakeSplitPropertyProcedure(tree *schematree.SchemaTree, splitter backoff.SplitterFunc, merger backoff.MergerFunc) Procedure {
 	b := backoff.NewBackoffSplitPropertySet(tree, splitter, merger)
-	return func(asm *assessment.Instance) schematree.PropertyRecommendations {
+	return func(asm *schematree.Instance) schematree.PropertyRecommendations {
 		return b.Recommend(asm.Props)
 	}
 }
