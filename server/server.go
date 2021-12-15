@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"RecommenderServer/strategy"
@@ -45,7 +46,10 @@ func setupLeanRecommender(
 			fmt.Println("Malformed Request.") // TODO: Json-Schema helps
 			return
 		}
-		fmt.Println(input)
+		var jsonstring = fmt.Sprintln(input)
+		escapedjsonstring := strings.Replace(jsonstring, "\n", "", -1)
+		escapedjsonstring = strings.Replace(escapedjsonstring, "\r", "", -1)
+		fmt.Println(escapedjsonstring)
 		instance := schematree.NewInstanceFromInput(input.Properties, input.Types, model, true)
 
 		// Make a recommendation based on the assessed input and chosen strategy.
