@@ -79,7 +79,7 @@ func main() {
 
 			// measure time - stop time measurement and print the measurements
 			if measureTime {
-				fmt.Println("Execution Time:", time.Since(timeCheckpoint))
+				log.Println("Execution Time:", time.Since(timeCheckpoint))
 			}
 
 			// write cpu profile to file - stop profiling
@@ -136,12 +136,12 @@ func main() {
 
 			// Load the schematree from the binary file.
 
-			fmt.Printf("Loading schema (from file %v): ", cleanedmodelBinary)
+			log.Printf("Loading schema (from file %v): ", cleanedmodelBinary)
 
 			/// file handling
 			f, err := os.Open(cleanedmodelBinary)
 			if err != nil {
-				fmt.Printf("Encountered error while trying to open the file: %v\n", err)
+				log.Printf("Encountered error while trying to open the file: %v\n", err)
 				log.Panic(err)
 			}
 
@@ -170,20 +170,20 @@ func main() {
 				log.Printf("Run Config Workflow %v", workflowFile)
 			} else {
 				workflow = strategy.MakePresetWorkflow("direct", model)
-				fmt.Printf("Run Standard Recommender ")
+				log.Printf("Run Standard Recommender ")
 			}
 
 			// Initiate the HTTP server. Make it stop on <Enter> press.
 			router := server.SetupEndpoints(model, workflow, 500)
 
 			if certFile != "" && keyFile != "" {
-				fmt.Printf("Now listening for https requests on 0.0.0.0:%v\n", serveOnPort)
+				log.Printf("Now listening for https requests on 0.0.0.0:%v\n", serveOnPort)
 				err = http.ListenAndServeTLS(fmt.Sprintf("0.0.0.0:%v", serveOnPort), certFile, keyFile, router)
 				if err != nil {
 					log.Panicln(err)
 				}
 			} else {
-				fmt.Printf("Now listening for http requests on 0.0.0.0:%v\n", serveOnPort)
+				log.Printf("Now listening for http requests on 0.0.0.0:%v\n", serveOnPort)
 				err = http.ListenAndServe(fmt.Sprintf("0.0.0.0:%v", serveOnPort), router)
 				if err != nil {
 					log.Panicln(err)

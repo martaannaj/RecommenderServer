@@ -1,7 +1,7 @@
 package schematree
 
 import (
-	"fmt"
+	"log"
 	"runtime"
 )
 
@@ -11,10 +11,10 @@ func PrintMemUsage() {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 	// For info on each, see: https://golang.org/pkg/runtime/#MemStats
-	fmt.Printf("Alloc = %.2f MiB", bToMb(m.Alloc))
-	fmt.Printf("\tTotalAlloc = %.2f MiB", bToMb(m.TotalAlloc))
-	fmt.Printf("\tSys = %.2f MiB", bToMb(m.Sys))
-	fmt.Printf("\tNumGC = %v\n", m.NumGC)
+	log.Printf("Alloc = %.2f MiB", bToMb(m.Alloc))
+	log.Printf("\tTotalAlloc = %.2f MiB", bToMb(m.TotalAlloc))
+	log.Printf("\tSys = %.2f MiB", bToMb(m.Sys))
+	log.Printf("\tNumGC = %v\n", m.NumGC)
 }
 
 func bToMb(b uint64) float64 {

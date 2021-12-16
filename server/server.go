@@ -4,6 +4,7 @@ import (
 	"RecommenderServer/schematree"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -43,19 +44,19 @@ func setupLeanRecommender(
 		err := json.NewDecoder(req.Body).Decode(&input)
 		if err != nil {
 			res.WriteHeader(400)
-			fmt.Println("Malformed Request.") // TODO: Json-Schema helps
+			log.Println("Malformed Request.") // TODO: Json-Schema helps
 			return
 		}
 		var jsonstring = fmt.Sprintln(input)
 		escapedjsonstring := strings.Replace(jsonstring, "\n", "", -1)
 		escapedjsonstring = strings.Replace(escapedjsonstring, "\r", "", -1)
-		fmt.Println(escapedjsonstring)
+		log.Println("request received ", escapedjsonstring)
 		instance := schematree.NewInstanceFromInput(input.Properties, input.Types, model, true)
 
 		// Make a recommendation based on the assessed input and chosen strategy.
 		t1 := time.Now()
 		rec := workflow.Recommend(instance)
-		fmt.Println(time.Since(t1))
+		log.Println("request ", escapedjsonstring, " answered in ", time.Since(t1))
 
 		// Put a hard limit on the recommendations returned
 		propsCount := 0
@@ -93,7 +94,7 @@ func setupLeanRecommender(
 		res.Header().Set("Content-Type", "application/json")
 		err = json.NewEncoder(res).Encode(recResp)
 		if err != nil {
-			fmt.Println("Malformed Response.")
+			log.Println("Malformed Response.", &recResp)
 			return
 		}
 	}
