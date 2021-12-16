@@ -2,7 +2,6 @@ package strategy
 
 import (
 	"RecommenderServer/schematree"
-	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -14,7 +13,7 @@ func TestConditions(t *testing.T) {
 	/// file handling
 	f, err := os.Open(treePath)
 	if err != nil {
-		fmt.Printf("Encountered error while trying to open the file: %v\n", err)
+		log.Printf("Encountered error while trying to open the file: %v\n", err)
 		log.Panic(err)
 	}
 	schema, err := schematree.Load(f, false)

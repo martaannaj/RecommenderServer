@@ -3,10 +3,10 @@ package schematree
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"os"
-	"fmt"
 	"log"
+	"os"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var typedTreepath = "../testdata/10M.nt.gz.schemaTree.typed.bin"
@@ -24,7 +24,7 @@ func (ps PropertyRecommendations) contains(str string, prob float64) bool {
 func TestRecommend(t *testing.T) {
 	f, err := os.Open(typedTreepath)
 	if err != nil {
-		fmt.Printf("Encountered error while trying to open the file: %v\n", err)
+		log.Printf("Encountered error while trying to open the file: %v\n", err)
 		log.Panic(err)
 	}
 	tree, _ := Load(f, false)
@@ -46,7 +46,7 @@ func TestRecommend(t *testing.T) {
 func TestRecommendProperty(t *testing.T) {
 	f, err := os.Open(typedTreepath)
 	if err != nil {
-		fmt.Printf("Encountered error while trying to open the file: %v\n", err)
+		log.Printf("Encountered error while trying to open the file: %v\n", err)
 		log.Panic(err)
 	}
 	tree, _ := Load(f, false)

@@ -2,8 +2,8 @@ package schematree
 
 import (
 	"encoding/gob"
-	"fmt"
 	"io"
+	"log"
 	"strings"
 	"sync"
 	"time"
@@ -54,7 +54,7 @@ func Load(f io.Reader, stripURI bool) (*SchemaTree, error) {
 
 	r, err := gzip.NewReader(f)
 	if err != nil {
-		fmt.Printf("Encountered error while trying to decompress the file: %v\n", err)
+		log.Printf("Encountered error while trying to decompress the file: %v\n", err)
 		return nil, err
 	}
 	defer r.Close()
@@ -86,7 +86,7 @@ func Load(f io.Reader, stripURI bool) (*SchemaTree, error) {
 		item.SortOrder = uint32(sortOrder)
 		tree.PropMap[*item.Str] = item
 	}
-	fmt.Printf("%v properties... ", len(props))
+	log.Printf("%v properties... ", len(props))
 
 	// decode MinSup
 	err = d.Decode(&tree.MinSup)
@@ -95,7 +95,7 @@ func Load(f io.Reader, stripURI bool) (*SchemaTree, error) {
 	}
 
 	// decode Root
-	fmt.Printf("decoding tree...")
+	log.Printf("start decoding tree...")
 	err = tree.Root.decodeGob(d, props)
 
 	if err != nil {
@@ -104,7 +104,7 @@ func Load(f io.Reader, stripURI bool) (*SchemaTree, error) {
 
 	// legacy import bug workaround
 	if *tree.Root.ID.Str != "root" {
-		fmt.Println("WARNING!!! Encountered legacy root node import bug - root node counts will be incorrect!")
+		log.Println("WARNING!!! Encountered legacy root node import bug - root node counts will be incorrect!")
 		tree.Root.ID = tree.PropMap.get("root")
 	}
 
@@ -119,11 +119,11 @@ func Load(f io.Reader, stripURI bool) (*SchemaTree, error) {
 	}
 
 	if err != nil {
-		fmt.Printf("Encountered error while decoding the file: %v\n", err)
+		log.Printf("Encountered error while decoding the file: %v\n", err)
 		return nil, err
 	}
 
-	fmt.Println(time.Since(t1))
+	log.Println("finished decoding tree in ", time.Since(t1))
 	return tree, err
 }
 

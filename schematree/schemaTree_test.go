@@ -3,10 +3,10 @@ package schematree
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"fmt"
-	"os"
 	"log"
+	"os"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var treePath = "../testdata/10M.nt.gz.schemaTree.bin"
@@ -23,7 +23,7 @@ func TestLoad(t *testing.T) {
 	t.Run("TypedSchemaTree", func(t *testing.T) {
 		f, err := os.Open(treePathTyped)
 		if err != nil {
-			fmt.Printf("Encountered error while trying to open the file: %v\n", err)
+			log.Printf("Encountered error while trying to open the file: %v\n", err)
 			log.Panic(err)
 		}
 		tree, _ := Load(f, false)
@@ -35,7 +35,7 @@ func TestLoad(t *testing.T) {
 	t.Run("UnTypedSchemaTree", func(t *testing.T) {
 		f, err := os.Open(treePath)
 		if err != nil {
-			fmt.Printf("Encountered error while trying to open the file: %v\n", err)
+			log.Printf("Encountered error while trying to open the file: %v\n", err)
 			log.Panic(err)
 		}
 		tree, _ := Load(f, false)
