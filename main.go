@@ -29,6 +29,8 @@ func main() {
 	var serveOnPort int                          // used by serve
 	var workflowFile string                      // used by serve
 	var stripURIs bool                           // used globally
+	var certFile string                          // used by serve
+	var keyFile string                           // used by serve
 
 	// Setup helper variables
 	var timeCheckpoint time.Time // used globally
@@ -123,6 +125,11 @@ func main() {
 			" endpoint using an HTTP Server.\nAvailable endpoints are stated in the server README.",
 		Args: cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
+
+			if (keyFile == "") != (certFile == "") {
+				log.Panicln("Either both --cert and --key must be set, or neither of them")
+			}
+
 			modelBinary := args[0]
 			cleanedmodelBinary := filepath.Clean(modelBinary)
 			// glossaryBinary := &args[1]
@@ -169,14 +176,24 @@ func main() {
 			// Initiate the HTTP server. Make it stop on <Enter> press.
 			router := server.SetupEndpoints(model, workflow, 500)
 
-			fmt.Printf("Now listening on 0.0.0.0:%v\n", serveOnPort)
-			err = http.ListenAndServe(fmt.Sprintf("0.0.0.0:%v", serveOnPort), router)
-			if err != nil {
-				log.Panicln(err)
+			if certFile != "" && keyFile != "" {
+				fmt.Printf("Now listening for https requests on 0.0.0.0:%v\n", serveOnPort)
+				err = http.ListenAndServeTLS(fmt.Sprintf("0.0.0.0:%v", serveOnPort), certFile, keyFile, router)
+				if err != nil {
+					log.Panicln(err)
+				}
+			} else {
+				fmt.Printf("Now listening for http requests on 0.0.0.0:%v\n", serveOnPort)
+				err = http.ListenAndServe(fmt.Sprintf("0.0.0.0:%v", serveOnPort), router)
+				if err != nil {
+					log.Panicln(err)
+				}
 			}
 		},
 	}
 	cmdServe.Flags().IntVarP(&serveOnPort, "port", "p", 8080, "`port` of http server")
+	cmdServe.Flags().StringVarP(&certFile, "cert", "c", "", "the location of the certificate file (for TLS)")
+	cmdServe.Flags().StringVarP(&keyFile, "key", "k", "", "the location of the private key file (for TLS)")
 	cmdServe.Flags().StringVarP(&workflowFile, "workflow", "w", "./configuration/Workflow.json", "`path` to config file that defines the workflow")
 	cmdServe.Flags().BoolVarP(&stripURIs, "stripURI", "s", true, "flag set to true if the recommendations should be served without URIs")
 
@@ -187,4 +204,3 @@ func main() {
 		log.Panicln(err)
 	}
 }
-
