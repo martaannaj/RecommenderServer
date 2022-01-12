@@ -87,4 +87,9 @@ systemctl start docker-compose@recommenderserver
 With the ```docker-compose.yml``` in this repository this should have the service running on port 8771.
 
 
+## using TLS
+
+In an untrusted environment, one shall use TLS to protect the network traffic to and from this recommender server. To use TLS, use the cert and key options to specify the location of the certificate file and the location of the private key file.
+
+semgrep raises a warning for the fact that this server has the option to run without TLS. This warning has been suppressed.
 
