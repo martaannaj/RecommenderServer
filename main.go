@@ -184,7 +184,8 @@ func main() {
 				}
 			} else {
 				log.Printf("Now listening for http requests on 0.0.0.0:%v\n", serveOnPort)
-				err = http.ListenAndServe(fmt.Sprintf("0.0.0.0:%v", serveOnPort), router)
+				// we do nto want semgrep to catch this because the option to use the server with TLS is provided, but not necessary in all environments
+				err = http.ListenAndServe(fmt.Sprintf("0.0.0.0:%v", serveOnPort), router) // nosemgrep: go.lang.security.audit.net.use-tls.use-tls
 				if err != nil {
 					log.Panicln(err)
 				}
