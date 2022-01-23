@@ -24,18 +24,21 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	// Setup the variables where all flags will reside.
-	var cpuprofile, memprofile, traceFile string // used globally
-	var measureTime bool                         // used globally
-	var serveOnPort int                          // used by serve
-	var workflowFile string                      // used by serve
-	var stripURIs bool                           // used globally
-	var certFile string                          // used by serve
-	var keyFile string                           // used by serve
+	var cpuprofile, memprofile, traceFileName string // used globally
+	var measureTime bool                             // used globally
+	var serveOnPort int                              // used by serve
+	var workflowFile string                          // used by serve
+	var stripURIs bool                               // used globally
+	var certFile string                              // used by serve
+	var keyFile string                               // used by serve
 
 	// Setup helper variables
 	var timeCheckpoint time.Time // used globally
 
 	// writeOutPropertyFreqs := flag.Bool("writeOutPropertyFreqs", false, "set this to write the frequency of all properties to a csv after first pass or schematree loading")
+
+	var cpuprofileFile *os.File // used for profiling in case it is enabled
+	var traceFile *os.File      // used for tracing in case it is enabled
 
 	// root command
 	cmdRoot := &cobra.Command{
@@ -53,17 +56,19 @@ func main() {
 				if err := pprof.StartCPUProfile(f); err != nil {
 					log.Fatal("could not start CPU profile: ", err)
 				}
+				cpuprofileFile = f
 			}
 
 			// write trace execution to file - open file and start tracing
-			if traceFile != "" {
-				f, err := os.Create(traceFile)
+			if traceFileName != "" {
+				f, err := os.Create(traceFileName)
 				if err != nil {
 					log.Fatal("could not create trace file: ", err)
 				}
 				if err := trace.Start(f); err != nil {
 					log.Fatal("could not start tracing: ", err)
 				}
+				traceFile = f
 			}
 
 			// measure time - start measuring the time
@@ -85,6 +90,7 @@ func main() {
 			// write cpu profile to file - stop profiling
 			if cpuprofile != "" {
 				pprof.StopCPUProfile()
+				cpuprofileFile.Close()
 			}
 
 			// write memory profile to file
@@ -104,8 +110,9 @@ func main() {
 			}
 
 			// write trace execution to file - stop tracing
-			if traceFile != "" {
+			if traceFileName != "" {
 				trace.Stop()
+				traceFile.Close()
 			}
 
 		},
@@ -114,7 +121,7 @@ func main() {
 	// global flags for root command
 	cmdRoot.PersistentFlags().StringVar(&cpuprofile, "cpuprofile", "", "write cpu profile to `file`")
 	cmdRoot.PersistentFlags().StringVar(&memprofile, "memprofile", "", "write memory profile to `file`")
-	cmdRoot.PersistentFlags().StringVar(&traceFile, "trace", "", "write execution trace to `file`")
+	cmdRoot.PersistentFlags().StringVar(&traceFileName, "trace", "", "write execution trace to `file`")
 	cmdRoot.PersistentFlags().BoolVarP(&measureTime, "time", "t", false, "measure time of command execution")
 
 	// subcommand serve
