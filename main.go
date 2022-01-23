@@ -49,7 +49,7 @@ func main() {
 
 			// write cpu profile to file - open file and start profiling
 			if cpuprofile != "" {
-				f, err := os.Create(cpuprofile)
+				f, err := os.Create(filepath.Clean(cpuprofile))
 				if err != nil {
 					log.Fatal("could not create CPU profile: ", err)
 				}
@@ -61,7 +61,7 @@ func main() {
 
 			// write trace execution to file - open file and start tracing
 			if traceFileName != "" {
-				f, err := os.Create(traceFileName)
+				f, err := os.Create(filepath.Clean(traceFileName))
 				if err != nil {
 					log.Fatal("could not create trace file: ", err)
 				}
@@ -90,12 +90,15 @@ func main() {
 			// write cpu profile to file - stop profiling
 			if cpuprofile != "" {
 				pprof.StopCPUProfile()
-				cpuprofileFile.Close()
+				err := cpuprofileFile.Close()
+				if err != nil {
+					log.Fatal(err, "Could not close the cpu profiling file properly")
+				}
 			}
 
 			// write memory profile to file
 			if memprofile != "" {
-				f, err := os.Create(memprofile)
+				f, err := os.Create(filepath.Clean(memprofile))
 				if err != nil {
 					log.Fatal("could not create memory profile: ", err)
 				}
@@ -105,14 +108,17 @@ func main() {
 				}
 				err = f.Close()
 				if err != nil {
-					log.Panic(err)
+					log.Fatal(err)
 				}
 			}
 
 			// write trace execution to file - stop tracing
 			if traceFileName != "" {
 				trace.Stop()
-				traceFile.Close()
+				err := traceFile.Close()
+				if err != nil {
+					log.Fatal(err, "Could not close the trace file properly")
+				}
 			}
 
 		},
