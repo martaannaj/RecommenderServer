@@ -8,18 +8,6 @@ m_error() {
     exit 2
 }
 
-install_go() {
-  echo "Installing Go"
-  cd /srv
-  if [ ! -f /tmp/go1.13.linux-amd64.tar.gz ]; then
-   if ! wget https://dl.google.com/go/go1.13.linux-amd64.tar.gz -O /tmp/go1.13.linux-amd64.tar.gz; then
-     m_error "Unable to download Go lang 1.13 from Google!"
-   fi
-  fi
-  tar xvfz /tmp/go1.13.linux-amd64.tar.gz
-  echo "Go installed"
-}
-
 build_recommenderserver() {
   cd /srv/recommender
   if ! go build .; then
@@ -27,14 +15,11 @@ build_recommenderserver() {
   fi
 }
 
-
-install_go
-
-export GOROOT=/srv/go
-export GOPATH=/srv/goProjects
-export PATH=${GOPATH}/bin:${GOROOT}/bin:${PATH}
+export GOROOT=/usr/lib/go-1.17
+export PATH=${GOROOT}/bin:${PATH}
+# export GOPATH=/srv/goProjects
+# export PATH=${GOPATH}/bin:${PATH}
 
 build_recommenderserver
-
 
 echo "Successfully prepared RecommenderServer!"

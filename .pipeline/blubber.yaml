@@ -1,5 +1,5 @@
 version: v4
-base: docker-registry.wikimedia.org/wikimedia-stretch:latest
+base: docker-registry.wikimedia.org/bullseye:latest
 
 runs:
   insecurely: true
@@ -9,9 +9,7 @@ lives:
 
 variants:
   build:
-    base: docker-registry.wikimedia.org/golang:latest
-    apt:
-      packages: [ wget]
+    base: docker-registry.wikimedia.org/golang1.17:latest
     builder:
       command: [ ./blubber-prepare.sh ]
       requirements: [ . ]
@@ -21,4 +19,4 @@ variants:
   test:
     includes: [ build ]
     entrypoint: [ "bash", "./recommender/blubber-entrypoint-test.sh" ]
-      
+
