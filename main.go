@@ -10,6 +10,8 @@ import (
 	"runtime/pprof"
 	"runtime/trace"
 
+	"RecommenderServer/cli"
+
 	"github.com/spf13/cobra"
 )
 
@@ -119,7 +121,7 @@ func main() {
 	cmdRoot.PersistentFlags().StringVar(&traceFileName, "trace", "", "write execution trace to `file`")
 	cmdRoot.PersistentFlags().BoolVarP(&measureTime, "time", "t", false, "measure time of command execution")
 
-	cmdRoot.AddCommand(CommandWikiServe())
+	cmdRoot.AddCommand(cli.CommandWikiServe())
 	// Start the CLI application
 	err := cmdRoot.Execute()
 	if err != nil {

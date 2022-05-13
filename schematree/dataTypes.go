@@ -23,6 +23,7 @@ func (p *IItem) increment() {
 	atomic.AddUint64(&p.TotalCount, 1)
 }
 
+// prefix t# identifies properties that represent types
 const typePrefix = "t#"
 
 func (p *IItem) IsType() bool {
@@ -60,6 +61,19 @@ func (m propMap) get(iri string) (item *IItem) { // TODO: Implement sameas Mappi
 		m[iri] = item
 	}
 	return
+}
+
+func (p propMap) count() (int, int) {
+	props := 0
+	types := 0
+	for _, item := range p {
+		if item.IsType() {
+			types++
+		} else {
+			props++
+		}
+	}
+	return props, types
 }
 
 // An array of pointers to IRI structs

@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"RecommenderServer/configuration"
@@ -18,7 +18,6 @@ func CommandWikiServe() *cobra.Command {
 
 	var serveOnPort int     // used by serve
 	var workflowFile string // used by serve
-	var stripURIs bool      // used globally
 	var certFile string     // used by serve
 	var keyFile string      // used by serve
 
@@ -50,7 +49,7 @@ func CommandWikiServe() *cobra.Command {
 				log.Panic(err)
 			}
 
-			model, err := schematree.Load(f, stripURIs)
+			model, err := schematree.LoadProtocolBuffer(f)
 			if err != nil {
 				log.Panicln(err)
 			}
@@ -101,6 +100,5 @@ func CommandWikiServe() *cobra.Command {
 	cmdServe.Flags().StringVarP(&certFile, "cert", "c", "", "the location of the certificate file (for TLS)")
 	cmdServe.Flags().StringVarP(&keyFile, "key", "k", "", "the location of the private key file (for TLS)")
 	cmdServe.Flags().StringVarP(&workflowFile, "workflow", "w", "./configuration/Workflow.json", "`path` to config file that defines the workflow")
-	cmdServe.Flags().BoolVarP(&stripURIs, "stripURI", "s", true, "flag set to true if the recommendations should be served without URIs")
 	return cmdServe
 }
