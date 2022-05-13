@@ -59,6 +59,7 @@ func (node *SchemaNode) getOrCreateChild(term *IItem) *SchemaNode {
 	i := sort.Search(
 		len(children),
 		func(i int) bool {
+			// nosemgrep: go.lang.security.audit.unsafe.use-of-unsafe-block
 			return uintptr(unsafe.Pointer(children[i].ID)) >= uintptr(unsafe.Pointer(term)) // #nosec G103 # The unsafe pointers are converted to uintptr and only used to create an ordering. They are never converted back to Pointers.
 		})
 
@@ -78,6 +79,7 @@ func (node *SchemaNode) getOrCreateChild(term *IItem) *SchemaNode {
 	i = sort.Search(
 		len(children),
 		func(i int) bool {
+			// nosemgrep: go.lang.security.audit.unsafe.use-of-unsafe-block
 			return uintptr(unsafe.Pointer(children[i].ID)) >= uintptr(unsafe.Pointer(term)) // #nosec G103 # The unsafe pointers are converted to uintptr and only used to create an ordering. They are never converted back to Pointers.
 		})
 	if i < len(node.Children) {
@@ -105,11 +107,13 @@ func (node *SchemaNode) getOrCreateChild(term *IItem) *SchemaNode {
 }
 
 func lock_for_term(item *IItem) uint64 {
+	// nosemgrep: go.lang.security.audit.unsafe.use-of-unsafe-block
 	val := uint64(uintptr(unsafe.Pointer(item)) % lockPrime) // #nosec G103 # the unsafe pointer is immediately converted into a uintptr and never back to a pointer type.
 	return val
 }
 
 func lock_for_node(node *SchemaNode) uint64 {
+	// nosemgrep: go.lang.security.audit.unsafe.use-of-unsafe-block
 	val := uint64(uintptr(unsafe.Pointer(node)) % lockPrime) // #nosec G103 # the unsafe pointer is immediately converted into a uintptr and never back to a pointer type.
 	return val
 }
