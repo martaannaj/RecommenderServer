@@ -122,6 +122,7 @@ func main() {
 	cmdRoot.PersistentFlags().BoolVarP(&measureTime, "time", "t", false, "measure time of command execution")
 
 	cmdRoot.AddCommand(cli.CommandWikiServe())
+	cmdRoot.AddCommand(cli.CommandWikiBuild())
 	// Start the CLI application
 	err := cmdRoot.Execute()
 	if err != nil {
