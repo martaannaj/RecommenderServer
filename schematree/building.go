@@ -16,57 +16,75 @@ import (
 func Create(dumpfile *mediawiki.ProcessDumpConfig) *SchemaTree {
 
 	schema := New(true, 0)
-	schema.TwoPass(dumpfile)
+	schema.TwoPass(wikidataDumpTransactionSource(dumpfile))
 
 	PrintMemUsage()
 	return schema
 }
 
-// TwoPass constructs a SchemaTree from the firstN subjects of the given NTriples file using a two-pass approach
-func (tree *SchemaTree) TwoPass(dumpfile *mediawiki.ProcessDumpConfig) {
-	tree.firstPass(dumpfile)
+type Transaction []string
+
+type TransactionSource func() <-chan Transaction
+
+func wikidataDumpTransactionSource(dumpfile *mediawiki.ProcessDumpConfig) TransactionSource {
+	return func() <-chan Transaction {
+		channel := make(chan Transaction)
+		errE := mediawiki.ProcessWikidataDump(
+			context.Background(),
+			dumpfile,
+			func(_ context.Context, a mediawiki.Entity) errors.E {
+				t := make(Transaction, 0)
+
+				for property_name := range a.Claims {
+					t = append(t, property_name)
+				}
+				types_claims := a.Claims["P31"]
+				for _, statement := range types_claims {
+					if statement.MainSnak.SnakType == mediawiki.Value {
+						if statement.MainSnak.DataValue == nil {
+							log.Fatal("Found a main snak with type Value, while it does not have a value. This is an error in the dump.")
+						}
+						val := statement.MainSnak.DataValue.Value
+						switch v := val.(type) {
+						default:
+							log.Printf("unexpected type %T", v)
+						case mediawiki.WikiBaseEntityIDValue:
+							tokenStr := typePrefix + val.(mediawiki.WikiBaseEntityIDValue).ID
+							t = append(t, tokenStr)
+						}
+					} else {
+						log.Printf("Found a type statement without a value: %v", statement)
+					}
+				}
+				channel <- t
+				return nil
+			},
+		)
+		if errE != nil {
+			log.Panicln("Something went wrong while processing..", errE)
+		}
+		return channel
+	}
+}
+
+// TwoPass constructs a SchemaTree from the transactions using a two-pass approach, i.e., the source is called twice to get the transactions
+func (tree *SchemaTree) TwoPass(sourceProvider TransactionSource) {
+	tree.firstPass(sourceProvider())
 	tree.updateSortOrder()
-	tree.secondPass(dumpfile)
+	tree.secondPass(sourceProvider())
 }
 
 // first pass: collect IItems and statistics
-func (tree *SchemaTree) firstPass(dumpfile *mediawiki.ProcessDumpConfig) {
-	log.Printf("Starting first pass for %v\n", dumpfile)
+func (tree *SchemaTree) firstPass(source <-chan Transaction) {
+	// log.Printf("Starting first pass for %v\n", dumpfile)
 	itemCount := uint64(0)
 
-	errE := mediawiki.ProcessWikidataDump(
-		context.Background(),
-		dumpfile,
-		func(_ context.Context, a mediawiki.Entity) errors.E {
-			atomic.AddUint64(&itemCount, uint64(1))
-			for property_name := range a.Claims {
-				predicate := tree.PropMap.get(property_name)
-				predicate.increment()
-			}
-			types_claims := a.Claims["P31"]
-			for _, statement := range types_claims {
-				if statement.MainSnak.SnakType == mediawiki.Value {
-					if statement.MainSnak.DataValue == nil {
-						log.Fatal("Found a main snak with type Value, while it does not have a value. This is an error in the dump.")
-					}
-					val := statement.MainSnak.DataValue.Value
-					switch v := val.(type) {
-					default:
-						log.Printf("unexpected type %T", v)
-					case mediawiki.WikiBaseEntityIDValue:
-						tokenStr := typePrefix + val.(mediawiki.WikiBaseEntityIDValue).ID
-						pType := tree.PropMap.get(tokenStr)
-						pType.increment()
-					}
-				} else {
-					log.Printf("Found a type statement without a value: %v", statement)
-				}
-			}
-			return nil
-		},
-	)
-	if errE != nil {
-		log.Panicln("Something went wrong while processing..", errE)
+	for v := range source {
+		atomic.AddUint64(&itemCount, uint64(1))
+		for _, name := range v {
+			predicate := tree.PropMap.get(name)
+			predicate.increment()
+		}
 	}
 
 	propCount, typeCount := tree.PropMap.count()
@@ -85,50 +103,18 @@ func (tree *SchemaTree) firstPass(dumpfile *mediawiki.ProcessDumpConfig) {
 	}
 }
 
-// build schema tree
-func (tree *SchemaTree) secondPass(dumpfile *mediawiki.ProcessDumpConfig) {
-
-	// go countTreeNodes(schema)
+func (tree *SchemaTree) secondPass(source <-chan Transaction) {
 	log.Println("Start of the second pass")
-
-	errE := mediawiki.ProcessWikidataDump(
-		context.Background(),
-		dumpfile,
-		func(_ context.Context, a mediawiki.Entity) errors.E {
-			properties := make([]*IItem, 0)
-			for property_name := range a.Claims {
-				predicate := tree.PropMap.get(property_name)
-				properties = append(properties, predicate)
-			}
-			types_claims := a.Claims["P31"]
-			for _, statement := range types_claims {
-				if statement.MainSnak.SnakType == mediawiki.Value {
-					if statement.MainSnak.DataValue == nil {
-						log.Fatal("Found a main snak with type Value, while it does not have a value. This is an error in the dump.")
-					}
-					val := statement.MainSnak.DataValue.Value
-					switch v := val.(type) {
-					default:
-						log.Printf("unexpected type %T", v)
-					case mediawiki.WikiBaseEntityIDValue:
-						tokenStr := typePrefix + val.(mediawiki.WikiBaseEntityIDValue).ID
-						pType := tree.PropMap.get(tokenStr)
-						properties = append(properties, pType)
-					}
-				} else {
-					log.Printf("Found a type statement without a value: %v", statement)
-				}
-			}
-			tree.Insert(properties)
-			return nil
-		},
-	)
-	if errE != nil {
-		log.Panicln("Something went wrong while processing..", errE)
+	for transaction := range source {
+		properties := make([]*IItem, 0)
+		for _, name := range transaction {
+			predicate := tree.PropMap.get(name)
+			properties = append(properties, predicate)
+		}
+		tree.Insert(properties)
 	}
 	log.Println("Second Pass ended")
 	PrintMemUsage()
-	// PrintLockStats()
 }
 
 // updateSortOrder updates iList according to actual frequencies
