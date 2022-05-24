@@ -2,7 +2,6 @@ package cli
 
 import (
 	"log"
-	"os"
 
 	"RecommenderServer/schematree"
 
@@ -31,7 +30,7 @@ func CommandWikiBuild() *cobra.Command {
 
 			// Create the tree output file by using the input dataset.
 			dumpFile := &mediawiki.ProcessDumpConfig{
-				Path: os.Args[1],
+				Path: *inputDataset,
 			}
 			schema := schematree.Create(dumpFile)
 			outputFileName := *inputDataset + ".schemaTree.typed"

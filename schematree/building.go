@@ -89,7 +89,7 @@ func (tree *SchemaTree) firstPass(dumpfile *mediawiki.ProcessDumpConfig) {
 func (tree *SchemaTree) secondPass(dumpfile *mediawiki.ProcessDumpConfig) {
 
 	// go countTreeNodes(schema)
-	log.Println("Start of the secon pass")
+	log.Println("Start of the second pass")
 
 	errE := mediawiki.ProcessWikidataDump(
 		context.Background(),
