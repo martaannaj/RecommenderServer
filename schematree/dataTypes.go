@@ -63,6 +63,7 @@ func (m propMap) get(iri string) (item *IItem) { // TODO: Implement sameas Mappi
 	return
 }
 
+// Get the number of properties and types (in that order). This does not include the root node.
 func (p propMap) count() (int, int) {
 	props := 0
 	types := 0
@@ -73,7 +74,8 @@ func (p propMap) count() (int, int) {
 			props++
 		}
 	}
-	return props, types
+	// remove the root from the properties
+	return props - 1, types
 }
 
 // An array of pointers to IRI structs
