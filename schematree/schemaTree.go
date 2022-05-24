@@ -4,7 +4,6 @@ import (
 	"RecommenderServer/schematree/serialization"
 	"compress/gzip"
 	"encoding/gob"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -212,15 +211,15 @@ func (tree *SchemaTree) SaveProtocolBuffer(filePath string) error {
 	}
 
 	if err == nil {
-		fmt.Printf("done (%v)\n", time.Since(t1))
+		log.Printf("done (%v)\n", time.Since(t1))
 	} else {
-		fmt.Printf("Saving schema failed with error: %v\n", err)
+		log.Printf("Saving schema failed with error: %v\n", err)
 	}
 	return err
 }
 
 func LoadProtocolBuffer(input io.Reader) (*SchemaTree, error) {
-	fmt.Printf("Start loading schema (protocol buffer format)")
+	log.Println("Start loading schema (protocol buffer format)")
 	in, err := io.ReadAll(input)
 	if err != nil {
 		log.Fatalln("Error reading input:", err)
@@ -244,21 +243,23 @@ func loadProtocolBuffer(in []byte) (*SchemaTree, error) {
 		// This sortorder was overwritten in the gob implementation, but that seems unnecesary.
 		// sortOrder was the index in the items array, but that is already set in the item anyway
 		// item.SortOrder = uint32(sortOrder)
-		tree.PropMap[pb_item.Str] = &IItem{
+		asiitem := &IItem{
 			Str:        &pb_item.Str,
 			TotalCount: pb_item.TotalCount,
 			SortOrder:  pb_item.SortOrder,
 			// TODO: check whether it is okay to not have the traverselpointer here
 			traversalPointer: nil,
 		}
+		tree.PropMap[pb_item.Str] = asiitem
+		props = append(props, asiitem)
 	}
-	fmt.Printf("%v properties... ", len(props))
+	log.Printf("%v properties... \n", len(props))
 
 	// decode MinSup
 	tree.MinSup = pb_tree.MinSup
 
 	// decode Root
-	fmt.Printf("decoding tree...")
+	log.Printf("decoding tree...")
 	tree.Root = *FromProtoSchemaNode(pb_tree.Root, props)
 
 	//decode Typed
@@ -271,7 +272,7 @@ func loadProtocolBuffer(in []byte) (*SchemaTree, error) {
 		}
 	}
 
-	fmt.Println("Time for decoding ", time.Since(t1), " seconds")
+	log.Println("Time for decoding ", time.Since(t1), " seconds")
 	return tree, nil
 
 }
