@@ -5,6 +5,7 @@ import (
 	"context"
 	"io"
 	"log"
+	"os"
 	"strings"
 
 	"gitlab.com/tozd/go/errors"
@@ -56,9 +57,21 @@ func WikidataDumpTransactionSource(dumpfile *mediawiki.ProcessDumpConfig) Transa
 	}
 }
 
+func SimpleFileTransactionSource(inputFile string) TransactionSource {
+	return SimpleReaderTransactionSource(
+		func() io.Reader {
+			f, err := os.Open(inputFile)
+			if err != nil {
+				log.Panic("File could not be opened", err)
+			}
+			return f
+		},
+	)
+}
+
 // SimpleFileTransactionSource creates a TransactionSource from a reader with on each line a transaction
 // Note that this needs a function providing readers because the two pass algorithm will pass twice
-func SimpleFileTransactionSource(input func() io.Reader) TransactionSource {
+func SimpleReaderTransactionSource(input func() io.Reader) TransactionSource {
 	return func() <-chan Transaction {
 		channel := make(chan Transaction)
 
