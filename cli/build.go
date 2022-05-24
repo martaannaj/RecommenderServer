@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"RecommenderServer/schematree"
+	"RecommenderServer/transactions"
 
 	"github.com/spf13/cobra"
 	"gitlab.com/tozd/go/mediawiki"
@@ -32,7 +33,10 @@ func CommandWikiBuild() *cobra.Command {
 			dumpFile := &mediawiki.ProcessDumpConfig{
 				Path: *inputDataset,
 			}
-			schema := schematree.Create(dumpFile)
+
+			s := transactions.WikidataDumpTransactionSource(dumpFile)
+
+			schema := schematree.Create(s)
 			outputFileName := *inputDataset + ".schemaTree.typed"
 			var err error
 			switch export_format {
