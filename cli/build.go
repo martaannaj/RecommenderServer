@@ -12,21 +12,21 @@ import (
 
 func CommandWikiBuild() *cobra.Command {
 
-	var firstNsubjects int64       // used by build-tree
-	var writeOutPropertyFreqs bool // used by build-tree
-	var export_format string       // used by built-tree
+	var export_format string // used by built-tree
 
 	// subcommand build-tree
 	cmdBuildTree := &cobra.Command{
-		Use:   "build-tree <dataset>",
+		Use:   "build-tree from-dump|from-tsv <dataset>",
 		Short: "Build the SchemaTree model",
 		Long: "A SchemaTree model will be built using the file provided in <dataset>." +
 			" The dataset should be a N-Triple of Items.\nTwo output files will be" +
 			" generated in the same directory as <dataset> and with suffixed names, namely:" +
 			" '<dataset>.firstPass.bin' and '<dataset>.schemaTree.bin'",
-		Args: cobra.ExactArgs(1),
+	}
 
-		Run: func(cmd *cobra.Command, args []string) {
+	// subcommand build-tree
+	buildTreeGeneric := func(fromDump bool) func(cmd *cobra.Command, args []string) {
+		return func(cmd *cobra.Command, args []string) {
 			inputDataset := &args[0]
 
 			// Create the tree output file by using the input dataset.
@@ -49,28 +49,23 @@ func CommandWikiBuild() *cobra.Command {
 			if err != nil {
 				log.Panicln(err)
 			}
-			// if writeOutPropertyFreqs {
-			// 	propFreqsPath := *inputDataset + ".propertyFreqs.csv"
-			// 	schema.WritePropFreqs(propFreqsPath)
-			// 	fmt.Printf("Wrote PropertyFreqs to %s\n", propFreqsPath)
+		}
+	}
 
-			// 	if typed_tree {
-			// 		typeFreqsPath := *inputDataset + ".typeFreqs.csv"
-			// 		schema.WriteTypeFreqs(typeFreqsPath)
-			// 		fmt.Printf("Wrote PropertyFreqs to %s\n", typeFreqsPath)
-			// 	}
-			// }
-
-		},
+	cmdBuildTreeDump := &cobra.Command{
+		Use:  "wikidatajason  <dataset>",
+		Args: cobra.ExactArgs(1),
+		Run:  buildTreeGeneric(true),
+	}
+	cmdBuildTreeTSV := &cobra.Command{
+		Use:  "tsv  <dataset>",
+		Args: cobra.ExactArgs(1),
+		Run:  buildTreeGeneric(false),
 	}
 	// cmdBuildTree.Flags().StringVarP(&inputDataset, "dataset", "d", "", "`path` to the dataset file to parse")
 	// cmdBuildTree.MarkFlagRequired("dataset")
-	cmdBuildTree.Flags().Int64VarP(&firstNsubjects, "first", "n", 0, "only parse the first `n` subjects") // TODO: handle negative inputs
-	cmdBuildTree.Flags().BoolVarP(
-		&writeOutPropertyFreqs, "write-frequencies", "f", false,
-		"write all property frequencies to a csv file named '<dataset>.propertyFreqs.csv' after the SchemaTree is built",
-	)
 	cmdBuildTree.Flags().StringVar(&export_format, "format", "pb", "The format for the export. Only 'pb' is supported, meaning protocol buffer serialization.")
-
+	cmdBuildTree.AddCommand((cmdBuildTreeDump))
+	cmdBuildTree.AddCommand((cmdBuildTreeTSV))
 	return cmdBuildTree
 }
