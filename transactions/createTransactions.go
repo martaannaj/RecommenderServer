@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path"
 	"strings"
 
 	"gitlab.com/tozd/go/errors"
@@ -64,7 +65,7 @@ func WikidataDumpTransactionSource(dumpfile *mediawiki.ProcessDumpConfig) Transa
 func SimpleFileTransactionSource(inputFile string) TransactionSource {
 	return SimpleReaderTransactionSource(
 		func() io.Reader {
-			f, err := os.Open(inputFile)
+			f, err := os.Open(path.Clean(inputFile))
 			if err != nil {
 				log.Panic("File could not be opened", err)
 			}
