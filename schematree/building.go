@@ -5,6 +5,7 @@ package schematree
 import (
 	"log"
 	"sort"
+	"sync"
 	"sync/atomic"
 
 	"RecommenderServer/transactions"
@@ -31,15 +32,25 @@ func (tree *SchemaTree) TwoPass(sourceProvider transactions.TransactionSource) {
 func (tree *SchemaTree) firstPass(source <-chan transactions.Transaction) {
 	// log.Printf("Starting first pass for %v\n", dumpfile)
 	itemCount := uint64(0)
-
-	for v := range source {
-		atomic.AddUint64(&itemCount, uint64(1))
-		for _, name := range v {
-			predicate := tree.PropMap.get(name)
-			predicate.increment()
-		}
+	var wg sync.WaitGroup
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for v := range source {
+				atomic.AddUint64(&itemCount, uint64(1))
+				amount := atomic.LoadUint64(&itemCount)
+				if amount%10000 == 0 {
+					log.Printf("Processed %d entities", amount)
+				}
+				for _, name := range v {
+					predicate := tree.PropMap.Get_or_create(name)
+					predicate.increment()
+				}
+			}
+		}()
 	}
-
+	wg.Wait()
 	propCount, typeCount := tree.PropMap.count()
 
 	log.Printf("%v subjects, %v properties, %v types\n", itemCount, propCount, typeCount)
@@ -58,14 +69,25 @@ func (tree *SchemaTree) firstPass(source <-chan transactions.Transaction) {
 
 func (tree *SchemaTree) secondPass(source <-chan transactions.Transaction) {
 	log.Println("Start of the second pass")
-	for transaction := range source {
-		properties := make([]*IItem, 0)
-		for _, name := range transaction {
-			predicate := tree.PropMap.get(name)
-			properties = append(properties, predicate)
-		}
-		tree.Insert(properties)
+	var wg sync.WaitGroup
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for transaction := range source {
+				properties := make([]*IItem, 0)
+				for _, name := range transaction {
+					predicate, ok := tree.PropMap.GetIfExisting(name)
+					if !ok {
+						log.Panic("During the second pass, found a predicate which was not yet in the propmap while this must have been added during the first pass.")
+					}
+					properties = append(properties, predicate)
+				}
+				tree.Insert(properties)
+			}
+		}()
 	}
+	wg.Wait()
 	log.Println("Second Pass ended")
 	PrintMemUsage()
 }
@@ -76,12 +98,8 @@ func (tree *SchemaTree) secondPass(source <-chan transactions.Transaction) {
 func (tree *SchemaTree) updateSortOrder() {
 	// make a list of all known properties
 	// Runtime: O(n), Memory: O(n)
-	iList := make(IList, len(tree.PropMap))
-	i := 0
-	for _, v := range tree.PropMap {
-		iList[i] = v
-		i++
-	}
+
+	iList := tree.PropMap.list_properties()
 
 	// sort by descending support. In case of equal support, lexicographically
 	// Runtime: O(n*log(n)), Memory: -

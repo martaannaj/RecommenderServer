@@ -21,7 +21,7 @@ type SchemaNode struct {
 
 //newRootNode creates a new root node for a given propMap
 func newRootNode(pMap propMap) SchemaNode {
-	return SchemaNode{pMap.get("root"), nil, [firstChildren]*SchemaNode{}, []*SchemaNode{}, nil, 0}
+	return SchemaNode{pMap.Get_or_create("root"), nil, [firstChildren]*SchemaNode{}, []*SchemaNode{}, nil, 0}
 }
 
 const lockPrime = 97 // arbitrary prime number

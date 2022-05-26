@@ -25,9 +25,13 @@ func TestRecommender(t *testing.T) {
 	b := BackoffSplitPropertySet{}
 	b.init(schema, TwoSupportRangesSplitter, DummyMerger)
 
-	prop1 := pMap["http://www.wikidata.org/prop/direct/P31"]
-	prop2 := pMap["http://www.wikidata.org/prop/direct/P21"]
-	prop3 := pMap["http://www.wikidata.org/prop/direct/P27"]
+	prop1, ok1 := pMap.GetIfExisting("http://www.wikidata.org/prop/direct/P31")
+	prop2, ok2 := pMap.GetIfExisting("http://www.wikidata.org/prop/direct/P21")
+	prop3, ok3 := pMap.GetIfExisting("http://www.wikidata.org/prop/direct/P27")
+	if !(ok1 && ok2 && ok3) {
+		t.Error("Expected properties were not in the propertyMap")
+	}
+
 	props := ST.IList{prop1, prop2, prop3}
 
 	b.Recommend(props)
@@ -44,9 +48,12 @@ func TestAvgMerger(t *testing.T) {
 	b := BackoffSplitPropertySet{}
 	b.init(schema, TwoSupportRangesSplitter, DummyMerger)
 
-	prop1 := pMap["http://www.wikidata.org/prop/direct/P31"]
-	prop2 := pMap["http://www.wikidata.org/prop/direct/P21"]
-	prop3 := pMap["http://www.wikidata.org/prop/direct/P27"]
+	prop1, ok1 := pMap.GetIfExisting("http://www.wikidata.org/prop/direct/P31")
+	prop2, ok2 := pMap.GetIfExisting("http://www.wikidata.org/prop/direct/P21")
+	prop3, ok3 := pMap.GetIfExisting("http://www.wikidata.org/prop/direct/P27")
+	if !(ok1 && ok2 && ok3) {
+		t.Error("Expected properties were not in the propertyMap")
+	}
 
 	rec1 := ST.PropertyRecommendations{ST.RankedPropertyCandidate{Property: prop1, Probability: 0.2}, ST.RankedPropertyCandidate{Property: prop2, Probability: 0.5}}
 	rec2 := ST.PropertyRecommendations{ST.RankedPropertyCandidate{Property: prop1, Probability: 0.8}, ST.RankedPropertyCandidate{Property: prop3, Probability: 0.4}}
@@ -79,9 +86,12 @@ func TestMaxMerger(t *testing.T) {
 	b := BackoffSplitPropertySet{}
 	b.init(schema, TwoSupportRangesSplitter, DummyMerger)
 
-	prop1 := pMap["http://www.wikidata.org/prop/direct/P31"]
-	prop2 := pMap["http://www.wikidata.org/prop/direct/P21"]
-	prop3 := pMap["http://www.wikidata.org/prop/direct/P27"]
+	prop1, ok1 := pMap.GetIfExisting("http://www.wikidata.org/prop/direct/P31")
+	prop2, ok2 := pMap.GetIfExisting("http://www.wikidata.org/prop/direct/P21")
+	prop3, ok3 := pMap.GetIfExisting("http://www.wikidata.org/prop/direct/P27")
+	if !(ok1 && ok2 && ok3) {
+		t.Error("Expected properties were not in the propertyMap")
+	}
 
 	rec1 := ST.PropertyRecommendations{ST.RankedPropertyCandidate{Property: prop1, Probability: 0.2}, ST.RankedPropertyCandidate{Property: prop2, Probability: 0.5}}
 	rec2 := ST.PropertyRecommendations{ST.RankedPropertyCandidate{Property: prop1, Probability: 0.8}, ST.RankedPropertyCandidate{Property: prop3, Probability: 0.4}}

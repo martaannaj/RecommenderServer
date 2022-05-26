@@ -30,7 +30,7 @@ func New(typed bool, minSup uint32) (tree *SchemaTree) {
 		minSup = 1
 	}
 
-	pMap := make(propMap)
+	pMap := NewPropMap()
 	tree = &SchemaTree{
 		PropMap: pMap,
 		Root:    newRootNode(pMap),
@@ -168,8 +168,8 @@ func (tree *SchemaTree) SaveProtocolBuffer(filePath string) error {
 	// encode propMap
 	pb_propmap := &serialization.PropMap{}
 	// first get them in order
-	props := make([]*IItem, len(tree.PropMap))
-	for _, p := range tree.PropMap {
+	props := make([]*IItem, tree.PropMap.Len())
+	for _, p := range tree.PropMap.list_properties() {
 		props[int(p.SortOrder)] = p
 	}
 	//then store them in order
@@ -243,7 +243,7 @@ func loadProtocolBuffer(in []byte) (*SchemaTree, error) {
 		// This sortorder was overwritten in the gob implementation, but that seems unnecesary.
 		// sortOrder was the index in the items array, but that is already set in the item anyway
 		// item.SortOrder = uint32(sortOrder)
-		asiitem := tree.PropMap.get(pb_item.Str)
+		asiitem := tree.PropMap.Get_or_create(pb_item.Str)
 		asiitem.TotalCount = pb_item.TotalCount
 		asiitem.SortOrder = pb_item.SortOrder
 		// TODO: check whether it is okay to have traverselpointer remaining nill
@@ -313,7 +313,7 @@ func Load(f io.Reader, stripURI bool) (*SchemaTree, error) {
 
 	for sortOrder, item := range props {
 		item.SortOrder = uint32(sortOrder)
-		tree.PropMap[*item.Str] = item
+		tree.PropMap.prop[*item.Str] = item
 	}
 	log.Printf("%v properties... ", len(props))
 
@@ -334,7 +334,7 @@ func Load(f io.Reader, stripURI bool) (*SchemaTree, error) {
 	// legacy import bug workaround
 	if *tree.Root.ID.Str != "root" {
 		log.Println("WARNING!!! Encountered legacy root node import bug - root node counts will be incorrect!")
-		tree.Root.ID = tree.PropMap.get("root")
+		tree.Root.ID = tree.PropMap.Get_or_create("root")
 	}
 
 	//decode Typed

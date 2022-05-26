@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var treePath = "../testdata/10M.nt.gz.schemaTree.bin"
@@ -22,8 +24,9 @@ func TestConditions(t *testing.T) {
 	}
 	pMap := schema.PropMap
 	// create properties
-	item1 := pMap["http://www.wikidata.org/prop/direct/P31"] // large number (1224) recommendations after executing on the schema tree ../testdata/10M.nt.gz.schemaTree.bin
-	item2 := pMap["http://www.wikidata.org/prop/direct/P21"] // small number (487)
+	item1, ok1 := pMap.GetIfExisting("http://www.wikidata.org/prop/direct/P31") // large number (1224) recommendations after executing on the schema tree ../testdata/10M.nt.gz.schemaTree.bin
+	item2, ok2 := pMap.GetIfExisting("http://www.wikidata.org/prop/direct/P21") // small number (487)
+	assert.True(t, ok1 && ok2, "Expected properties wre not in the propmap")
 	// create assessments
 	asm1 := schematree.NewInstance(schematree.IList{item1}, schema, true)
 	asm2 := schematree.NewInstance(schematree.IList{item2}, schema, true)
