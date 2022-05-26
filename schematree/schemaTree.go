@@ -243,14 +243,10 @@ func loadProtocolBuffer(in []byte) (*SchemaTree, error) {
 		// This sortorder was overwritten in the gob implementation, but that seems unnecesary.
 		// sortOrder was the index in the items array, but that is already set in the item anyway
 		// item.SortOrder = uint32(sortOrder)
-		asiitem := &IItem{
-			Str:        &pb_item.Str,
-			TotalCount: pb_item.TotalCount,
-			SortOrder:  pb_item.SortOrder,
-			// TODO: check whether it is okay to not have the traverselpointer here
-			traversalPointer: nil,
-		}
-		tree.PropMap[pb_item.Str] = asiitem
+		asiitem := tree.PropMap.get(pb_item.Str)
+		asiitem.TotalCount = pb_item.TotalCount
+		asiitem.SortOrder = pb_item.SortOrder
+		// TODO: check whether it is okay to have traverselpointer remaining nill
 		props = append(props, asiitem)
 	}
 	log.Printf("%v properties... \n", len(props))
