@@ -27,6 +27,7 @@ require (
 	github.com/go-git/gcfg v1.5.0 // indirect
 	github.com/go-git/go-billy/v5 v5.3.1 // indirect
 	github.com/go-git/go-git/v5 v5.4.2 // indirect
+	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.1 // indirect
@@ -43,7 +44,7 @@ require (
 	github.com/pingcap/parser v0.0.0-20210802034743-dd9b189324ce // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sergi/go-diff v1.2.0 // indirect
-	github.com/spf13/cast v1.5.0 // indirect
+	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/whilp/git-urls v1.0.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.1 // indirect
