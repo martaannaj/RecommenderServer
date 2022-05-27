@@ -80,6 +80,12 @@ func (m propMap) GetIfExisting(iri string) (item *IItem, ok bool) { // TODO: Imp
 	return
 }
 
+// Get the *IItem for the given iri, but does not take care of locking. It is up to the caller to ensure that no concurrent writing is ongoing.
+func (m propMap) noWritersGet(iri string) (item *IItem, ok bool) {
+	item, ok = m.prop[iri]
+	return
+}
+
 // Get the number of properties and types (in that order). This does not include the root node.
 func (p propMap) count() (int, int) {
 	p.propLock.RLock()
@@ -104,14 +110,20 @@ func (p propMap) Len() (length int) {
 	return
 }
 
-func (p propMap) list_properties() []*IItem {
-	p.propLock.RLock()
-	defer p.propLock.RUnlock()
+// noWritersList_properties returns the list of properties in this propMap
+// The caller *must* guarantee that no concurrent write operations are taking place!
+func (p propMap) noWritersList_properties() []*IItem {
 	all := make([]*IItem, 0, len(p.prop))
 	for _, item := range p.prop {
 		all = append(all, item)
 	}
 	return all
+}
+
+func (p propMap) list_properties() []*IItem {
+	p.propLock.RLock()
+	defer p.propLock.RUnlock()
+	return p.noWritersList_properties()
 }
 
 // An array of pointers to IRI structs
