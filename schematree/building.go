@@ -11,6 +11,26 @@ import (
 	"RecommenderServer/transactions"
 )
 
+var void struct{}
+var commonProps = map[string]struct{}{
+	"P31":   void,
+	"P1476": void,
+	"P577":  void,
+	"P1433": void,
+	"P2093": void,
+	"P304":  void,
+	"P478":  void,
+	"P433":  void,
+	"P698":  void,
+	"P356":  void,
+	"P921":  void,
+	"P407":  void,
+	"P17":   void,
+	"P50":   void,
+	"P2860": void,
+	"P131":  void,
+}
+
 // Create creates a new schema tree from given dataset
 func Create(sourceProvider transactions.TransactionSource) *SchemaTree {
 
@@ -37,6 +57,7 @@ func (tree *SchemaTree) firstPass(source <-chan transactions.Transaction) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
+			localmap := make(map[string]*IItem)
 			for v := range source {
 				atomic.AddUint64(&itemCount, uint64(1))
 				amount := atomic.LoadUint64(&itemCount)
@@ -44,7 +65,13 @@ func (tree *SchemaTree) firstPass(source <-chan transactions.Transaction) {
 					log.Printf("Processed %d entities", amount)
 				}
 				for _, name := range v {
-					predicate := tree.PropMap.Get_or_create(name)
+					predicate, ok := localmap[name]
+					if !ok {
+						predicate = tree.PropMap.Get_or_create(name)
+						if _, iscommon := commonProps[name]; iscommon {
+							localmap[name] = predicate
+						}
+					}
 					predicate.increment()
 				}
 			}
@@ -75,9 +102,9 @@ func (tree *SchemaTree) secondPass(source <-chan transactions.Transaction) {
 		go func() {
 			defer wg.Done()
 			for transaction := range source {
-				properties := make([]*IItem, 0)
+				properties := make([]*IItem, 0, len(transaction))
 				for _, name := range transaction {
-					predicate, ok := tree.PropMap.GetIfExisting(name)
+					predicate, ok := tree.PropMap.noWritersGet(name)
 					if !ok {
 						log.Panic("During the second pass, found a predicate which was not yet in the propmap while this must have been added during the first pass.")
 					}
