@@ -21,7 +21,7 @@ require (
 	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/cosnicolaou/pbzip2 v1.0.2-0.20211229030036-3ed02fdb7541 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/elliotchance/phpserialize v1.3.3 // indirect
+	github.com/elliotchance/phpserialize v1.3.2 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/foolin/pagser v0.1.5 // indirect
 	github.com/go-git/gcfg v1.5.0 // indirect
