@@ -15,7 +15,7 @@ import (
 // }
 
 func testPropertyMap() propMap {
-	return make(propMap)
+	return NewPropMap()
 }
 
 func emptyRootNodeTest(t *testing.T, root SchemaNode) {
@@ -33,7 +33,8 @@ func TestNewRootNode(t *testing.T) {
 }
 
 func TestIncrementSupport(t *testing.T) {
-	node := SchemaNode{testPropertyMap().get("root"), nil, [1]*SchemaNode{}, []*SchemaNode{}, nil, 0}
+	p := testPropertyMap().Get_or_create("root")
+	node := SchemaNode{p, nil, [1]*SchemaNode{}, []*SchemaNode{}, nil, 0}
 	assert.Equal(t, uint32(0), node.Support)
 	atomic.AddUint32(&node.Support, 1)
 	assert.Equal(t, uint32(1), node.Support)

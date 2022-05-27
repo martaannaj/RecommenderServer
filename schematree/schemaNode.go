@@ -1,8 +1,10 @@
 package schematree
 
 import (
+	"RecommenderServer/schematree/serialization"
 	"encoding/gob"
 	"sync"
+	"sync/atomic"
 )
 
 const firstChildren = 1
@@ -19,12 +21,59 @@ type SchemaNode struct {
 
 //newRootNode creates a new root node for a given propMap
 func newRootNode(pMap propMap) SchemaNode {
-	return SchemaNode{pMap.get("root"), nil, [firstChildren]*SchemaNode{}, []*SchemaNode{}, nil, 0}
+	return SchemaNode{pMap.Get_or_create("root"), nil, [firstChildren]*SchemaNode{}, []*SchemaNode{}, nil, 0}
 }
 
 const lockPrime = 97 // arbitrary prime number
 var globalItemLocks [lockPrime]*sync.Mutex
 var globalNodeLocks [lockPrime]*sync.RWMutex
+
+//incrementSupport increments the support of the schema node by one
+func (node *SchemaNode) incrementSupport() {
+	atomic.AddUint32(&node.Support, 1)
+}
+
+//convert the SchemaNode into a Protocolbuffer schemanode
+func (node *SchemaNode) AsProtoSchemaNode() *serialization.SchemaNode {
+
+	pb_node := serialization.SchemaNode{
+		SortOrder: node.ID.SortOrder,
+		Support:   node.Support,
+	}
+
+	// Children
+	for _, child := range node.Children {
+		pb_child := child.AsProtoSchemaNode()
+		pb_node.Children = append(pb_node.Children, pb_child)
+	}
+
+	return &pb_node
+}
+
+func FromProtoSchemaNode(pb_node *serialization.SchemaNode, props []*IItem) *SchemaNode {
+	// function scoping to allow for garbage collection
+	// err := func() error {
+	// ID
+
+	node := &SchemaNode{}
+	node.ID = props[pb_node.SortOrder]
+
+	// traversal pointer repopulation
+	node.nextSameID = node.ID.traversalPointer
+	node.ID.traversalPointer = node
+
+	// Support
+	node.Support = pb_node.Support
+
+	// Children
+	for _, pb_child := range pb_node.Children {
+		child := FromProtoSchemaNode(pb_child, props)
+		child.parent = node
+		node.Children = append(node.Children, child)
+	}
+
+	return node
+}
 
 // decodeGob decodes the schema node from its binary representation
 func (node *SchemaNode) decodeGob(d *gob.Decoder, props []*IItem) error {

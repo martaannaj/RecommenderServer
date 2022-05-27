@@ -1,14 +1,19 @@
 package schematree
 
 import (
+	"RecommenderServer/schematree/serialization"
+	"compress/gzip"
 	"encoding/gob"
 	"io"
 	"log"
+	"os"
+	"sort"
 	"strings"
 	"sync"
 	"time"
+	"unsafe"
 
-	gzip "github.com/klauspost/pgzip"
+	"google.golang.org/protobuf/proto"
 )
 
 // TypedSchemaTree is a schematree that includes type information as property nodes
@@ -25,7 +30,7 @@ func New(typed bool, minSup uint32) (tree *SchemaTree) {
 		minSup = 1
 	}
 
-	pMap := make(propMap)
+	pMap := NewPropMap()
 	tree = &SchemaTree{
 		PropMap: pMap,
 		Root:    newRootNode(pMap),
@@ -42,6 +47,230 @@ func (tree *SchemaTree) init() {
 		globalItemLocks[i] = &sync.Mutex{}
 		globalNodeLocks[i] = &sync.RWMutex{}
 	}
+}
+
+// getOrCreateChild returns the child of a node associated to a IItem. If such child does not exist, a new child is created.
+func (node *SchemaNode) getOrCreateChild(term *IItem) *SchemaNode {
+
+	// binary search for the child
+	globalNodeLocks[lock_for_node(node)].RLock()
+	children := node.Children
+	i := sort.Search(
+		len(children),
+		func(i int) bool {
+			// nosemgrep: go.lang.security.audit.unsafe.use-of-unsafe-block
+			return uintptr(unsafe.Pointer(children[i].ID)) >= uintptr(unsafe.Pointer(term)) // #nosec G103 # The unsafe pointers are converted to uintptr and only used to create an ordering. They are never converted back to Pointers.
+		})
+
+	if i < len(children) {
+		if child := children[i]; child.ID == term {
+			globalNodeLocks[lock_for_node(node)].RUnlock()
+			return child
+		}
+	}
+	globalNodeLocks[lock_for_node(node)].RUnlock()
+
+	// We have to add the child, aquire a lock for this term
+	globalNodeLocks[lock_for_node(node)].Lock()
+
+	// search again, since child might meanwhile have been added by other thread or previous search might have missed
+	children = node.Children
+	i = sort.Search(
+		len(children),
+		func(i int) bool {
+			// nosemgrep: go.lang.security.audit.unsafe.use-of-unsafe-block
+			return uintptr(unsafe.Pointer(children[i].ID)) >= uintptr(unsafe.Pointer(term)) // #nosec G103 # The unsafe pointers are converted to uintptr and only used to create an ordering. They are never converted back to Pointers.
+		})
+	if i < len(node.Children) {
+		if child := children[i]; child.ID == term {
+			globalNodeLocks[lock_for_node(node)].Unlock()
+			return child
+		}
+	}
+
+	// child not found, but i is the index where it would be inserted.
+	// create a new one...
+	globalItemLocks[lock_for_term(term)].Lock()
+	newChild := &SchemaNode{term, node, [firstChildren]*SchemaNode{}, []*SchemaNode{}, term.traversalPointer, 0}
+	term.traversalPointer = newChild
+	globalItemLocks[lock_for_term(term)].Unlock()
+
+	// ...and insert it at position i
+	node.Children = append(node.Children, nil)
+	copy(node.Children[i+1:], node.Children[i:])
+	node.Children[i] = newChild
+
+	globalNodeLocks[lock_for_node(node)].Unlock()
+
+	return newChild
+}
+
+func lock_for_term(item *IItem) uint64 {
+	// nosemgrep: go.lang.security.audit.unsafe.use-of-unsafe-block
+	val := uint64(uintptr(unsafe.Pointer(item)) % lockPrime) // #nosec G103 # the unsafe pointer is immediately converted into a uintptr and never back to a pointer type.
+	return val
+}
+
+func lock_for_node(node *SchemaNode) uint64 {
+	// nosemgrep: go.lang.security.audit.unsafe.use-of-unsafe-block
+	val := uint64(uintptr(unsafe.Pointer(node)) % lockPrime) // #nosec G103 # the unsafe pointer is immediately converted into a uintptr and never back to a pointer type.
+	return val
+}
+
+// Insert inserts all properties of a new subject into the schematree
+// The subject is given by
+// thread-safe
+func (tree *SchemaTree) Insert(propertySet []*IItem) {
+
+	// transform into iList of properties
+	properties := make(IList, len(propertySet))
+	copy(properties, propertySet)
+
+	// sort the properties descending by support
+	properties.Sort()
+
+	// insert sorted item list into the schemaTree
+	node := &tree.Root
+	node.incrementSupport()
+	for _, prop := range properties {
+		node = node.getOrCreateChild(prop) // recurse, i.e., node.getOrCreateChild(prop).insert(properties[1:], types)
+		node.incrementSupport()
+	}
+
+}
+
+// Support returns the total cooccurrence-frequency of the given property list
+func (tree *SchemaTree) Support(properties IList) uint32 {
+	var support uint32
+
+	if len(properties) == 0 {
+		return tree.Root.Support // empty set occured in all transactions
+	}
+
+	properties.Sort() // descending by support
+
+	// check all branches that include least frequent term
+	for term := properties[len(properties)-1].traversalPointer; term != nil; term = term.nextSameID {
+		if term.prefixContains(properties) {
+			support += term.Support
+		}
+	}
+
+	return support
+}
+
+func (tree *SchemaTree) SaveProtocolBuffer(filePath string) error {
+	t1 := time.Now()
+	log.Printf("Writing schema to protocol buffer file %v... ", filePath)
+
+	pb_tree := &serialization.SchemaTree{}
+
+	// encode propMap
+	pb_propmap := &serialization.PropMap{}
+	// first get them in order
+	props := make([]*IItem, tree.PropMap.Len())
+	for _, p := range tree.PropMap.list_properties() {
+		props[int(p.SortOrder)] = p
+	}
+	//then store them in order
+	for _, p := range props {
+		pb_propmap_item := &serialization.PropMapItem{
+			Str:        *p.Str,
+			TotalCount: p.TotalCount,
+			SortOrder:  p.SortOrder,
+		}
+		pb_propmap.Items = append(pb_propmap.Items, pb_propmap_item)
+	}
+
+	pb_tree.PropMap = pb_propmap
+	// encode MinSup
+
+	pb_tree.MinSup = tree.MinSup
+
+	// encode root
+	var root *serialization.SchemaNode = tree.Root.AsProtoSchemaNode()
+
+	pb_tree.Root = root
+
+	// encode Typed
+	if tree.Typed {
+		pb_tree.Options = []serialization.Options{serialization.Options_TYPED}
+	}
+	//else {
+	//no action needed. The default is an empty option list, wich is fine
+	//}
+
+	out, err := proto.Marshal(pb_tree)
+	if err != nil {
+		return err
+	}
+	// TODO check whether gzip compression helps
+
+	if err := os.WriteFile(filePath, out, 0600); err != nil {
+		log.Fatalln("Failed to write the protocol buffer tree", err)
+	}
+
+	if err == nil {
+		log.Printf("done (%v)\n", time.Since(t1))
+	} else {
+		log.Printf("Saving schema failed with error: %v\n", err)
+	}
+	return err
+}
+
+func LoadProtocolBuffer(input io.Reader) (*SchemaTree, error) {
+	log.Println("Start loading schema (protocol buffer format)")
+	in, err := io.ReadAll(input)
+	if err != nil {
+		log.Fatalln("Error reading input:", err)
+	}
+	return loadProtocolBuffer(in)
+}
+
+func loadProtocolBuffer(in []byte) (*SchemaTree, error) {
+	t1 := time.Now()
+	pb_tree := &serialization.SchemaTree{}
+	if err := proto.Unmarshal(in, pb_tree); err != nil {
+		return nil, err
+	}
+
+	tree := New(false, 1)
+
+	// decode propMap
+	var props []*IItem
+
+	for _, pb_item := range pb_tree.PropMap.Items {
+		// This sortorder was overwritten in the gob implementation, but that seems unnecesary.
+		// sortOrder was the index in the items array, but that is already set in the item anyway
+		// item.SortOrder = uint32(sortOrder)
+		asiitem := tree.PropMap.Get_or_create(pb_item.Str)
+		asiitem.TotalCount = pb_item.TotalCount
+		asiitem.SortOrder = pb_item.SortOrder
+		// TODO: check whether it is okay to have traverselpointer remaining nill
+		props = append(props, asiitem)
+	}
+	log.Printf("%v properties... \n", len(props))
+
+	// decode MinSup
+	tree.MinSup = pb_tree.MinSup
+
+	// decode Root
+	log.Printf("decoding tree...")
+	tree.Root = *FromProtoSchemaNode(pb_tree.Root, props)
+
+	//decode Typed
+	for _, option := range pb_tree.Options {
+		switch option {
+		case serialization.Options_TYPED:
+			tree.Typed = true
+		default:
+			log.Fatal("Unknown option in protocol buffer tree")
+		}
+	}
+
+	log.Println("Time for decoding ", time.Since(t1), " seconds")
+	return tree, nil
+
 }
 
 // Load loads a binarized SchemaTree from disk
@@ -84,7 +313,7 @@ func Load(f io.Reader, stripURI bool) (*SchemaTree, error) {
 
 	for sortOrder, item := range props {
 		item.SortOrder = uint32(sortOrder)
-		tree.PropMap[*item.Str] = item
+		tree.PropMap.prop[*item.Str] = item
 	}
 	log.Printf("%v properties... ", len(props))
 
@@ -105,7 +334,7 @@ func Load(f io.Reader, stripURI bool) (*SchemaTree, error) {
 	// legacy import bug workaround
 	if *tree.Root.ID.Str != "root" {
 		log.Println("WARNING!!! Encountered legacy root node import bug - root node counts will be incorrect!")
-		tree.Root.ID = tree.PropMap.get("root")
+		tree.Root.ID = tree.PropMap.Get_or_create("root")
 	}
 
 	//decode Typed
@@ -125,24 +354,4 @@ func Load(f io.Reader, stripURI bool) (*SchemaTree, error) {
 
 	log.Println("finished decoding tree in ", time.Since(t1))
 	return tree, err
-}
-
-// Support returns the total cooccurrence-frequency of the given property list
-func (tree *SchemaTree) Support(properties IList) uint32 {
-	var support uint32
-
-	if len(properties) == 0 {
-		return tree.Root.Support // empty set occured in all transactions
-	}
-
-	properties.Sort() // descending by support
-
-	// check all branches that include least frequent term
-	for term := properties[len(properties)-1].traversalPointer; term != nil; term = term.nextSameID {
-		if term.prefixContains(properties) {
-			support += term.Support
-		}
-	}
-
-	return support
 }

@@ -23,6 +23,7 @@ func (p *IItem) increment() {
 	atomic.AddUint64(&p.TotalCount, 1)
 }
 
+// prefix t# identifies properties that represent types
 const typePrefix = "t#"
 
 func (p *IItem) IsType() bool {
@@ -37,29 +38,92 @@ func (p IItem) String() string {
 	return fmt.Sprint(p.TotalCount, "x\t", *p.Str, " (", p.SortOrder, ")")
 }
 
-type propMap map[string]*IItem
+type propMap struct {
+	prop     map[string]*IItem
+	propLock *sync.RWMutex
+}
 
-var propMapLock sync.Mutex
+func NewPropMap() propMap {
+	a := propMap{
+		prop:     make(map[string]*IItem),
+		propLock: new(sync.RWMutex),
+	}
+	return a
+}
 
 // Note: get() is a mutator function. If no property is found with that iri, then it
 //       will build a new property, mutate the propMap to include it, and return the
 //       newly created property. The returned `item` is guaranteed to be non-null.
 // thread-safe
-func (m propMap) get(iri string) (item *IItem) { // TODO: Implement sameas Mapping/Resolution to single group identifier upon insert!
-	item, ok := m[iri]
+func (m propMap) Get_or_create(iri string) (item *IItem) { // TODO: Implement sameas Mapping/Resolution to single group identifier upon insert!
+	m.propLock.RLock()
+	item, ok := m.prop[iri]
+	m.propLock.RUnlock()
 	if !ok {
-		propMapLock.Lock()
-		defer propMapLock.Unlock()
+		m.propLock.Lock()
+		defer m.propLock.Unlock()
 
 		// recheck existence - might have been created by other thread
-		if item, ok = m[iri]; ok {
+		if item, ok = m.prop[iri]; ok {
 			return
 		}
-
-		item = &IItem{&iri, 0, uint32(len(m)), nil}
-		m[iri] = item
+		item = &IItem{&iri, 0, uint32(len(m.prop)), nil}
+		m.prop[iri] = item
 	}
 	return
+}
+
+func (m propMap) GetIfExisting(iri string) (item *IItem, ok bool) { // TODO: Implement sameas Mapping/Resolution to single group identifier upon insert!
+	m.propLock.RLock()
+	item, ok = m.prop[iri]
+	m.propLock.RUnlock()
+	return
+}
+
+// Get the *IItem for the given iri, but does not take care of locking. It is up to the caller to ensure that no concurrent writing is ongoing.
+func (m propMap) noWritersGet(iri string) (item *IItem, ok bool) {
+	item, ok = m.prop[iri]
+	return
+}
+
+// Get the number of properties and types (in that order). This does not include the root node.
+func (p propMap) count() (int, int) {
+	p.propLock.RLock()
+	defer p.propLock.RUnlock()
+	props := 0
+	types := 0
+	for _, item := range p.prop {
+		if item.IsType() {
+			types++
+		} else {
+			props++
+		}
+	}
+	// remove the root from the properties
+	return props - 1, types
+}
+
+func (p propMap) Len() (length int) {
+	p.propLock.RLock()
+	length = len(p.prop)
+	p.propLock.RUnlock()
+	return
+}
+
+// noWritersList_properties returns the list of properties in this propMap
+// The caller *must* guarantee that no concurrent write operations are taking place!
+func (p propMap) noWritersList_properties() []*IItem {
+	all := make([]*IItem, 0, len(p.prop))
+	for _, item := range p.prop {
+		all = append(all, item)
+	}
+	return all
+}
+
+func (p propMap) list_properties() []*IItem {
+	p.propLock.RLock()
+	defer p.propLock.RUnlock()
+	return p.noWritersList_properties()
 }
 
 // An array of pointers to IRI structs

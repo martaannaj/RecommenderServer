@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package schematree;
+
+option go_package = "schematree/serialization";
+
+message PropMapItem{
+    string Str = 1;
+    uint64 TotalCount = 2;
+    uint32 SortOrder = 3;
+    // traversalPointer -> can this be restored?
+}
+
+message PropMap {
+    // The items in their sortorder
+    repeated PropMapItem items = 1;
+}
+
+message SchemaNode{
+    uint32 sortOrder = 1;
+    uint32 Support = 2;
+    repeated SchemaNode children = 3;
+}
+
+enum Options{
+    TYPED = 0;
+}
+
+message SchemaTree{
+    PropMap propMap = 1;
+    uint32 MinSup = 2;
+    SchemaNode Root = 3;
+    repeated Options options = 4;
+}
+
+
+
+
+// message EntityOrLiteral {
+//     oneof entity_literal {
+//         uint32 entity = 1;
+//         string literal = 2;
+//     }
+// }
+
+// message Triple{
+//     uint32 subject = 1;
+//     uint32 predicate = 2;
+//     EntityOrLiteral object = 3;
+// }
+
+// message Qualifier {
+//     uint32 qualifier_relation = 1;
+//     EntityOrLiteral qualifier_value = 2;
+//     uint32 corresponding_triple = 4;
+// }
+
+
+// message Query {
+//     repeated Triple triples = 1;
+//     repeated Qualifier qualifiers = 2;
+//     repeated EntityOrLiteral easy_targets = 3;
+//     repeated EntityOrLiteral hard_targets = 4;
+//     uint32 diameter = 5;
+// }
+
+// message QueryData {
+//     repeated Query queries = 1;
+// }
+
+
+
