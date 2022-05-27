@@ -140,7 +140,7 @@ func (tree *SchemaTree) RecommendProperty(properties IList) (ranked PropertyReco
 		// fmt.Println(tree.Root.Support)
 		setSup := float64(tree.Root.Support) // empty set occured in all transactions
 		ranked = make([]RankedPropertyCandidate, tree.PropMap.Len())
-		for _, prop := range tree.PropMap.list_properties() {
+		for _, prop := range tree.PropMap.noWritersList_properties() {
 			ranked[int(prop.SortOrder)] = RankedPropertyCandidate{prop, float64(prop.TotalCount) / setSup}
 		}
 	}
@@ -209,7 +209,7 @@ func (tree *SchemaTree) RecommendPropertiesAndTypes(properties IList) (ranked Pr
 		// fmt.Println(tree.Root.Support)
 		setSup := float64(tree.Root.Support) // empty set occured in all transactions
 		ranked = make([]RankedPropertyCandidate, tree.PropMap.Len())
-		for _, prop := range tree.PropMap.list_properties() {
+		for _, prop := range tree.PropMap.noWritersList_properties() {
 			ranked[int(prop.SortOrder)] = RankedPropertyCandidate{prop, float64(prop.TotalCount) / setSup}
 		}
 	}
