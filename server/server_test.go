@@ -73,7 +73,10 @@ func TestGETRecommendations(t *testing.T) {
 			http_response := httptest.NewRecorder()
 			recommender_server(http_response, http_request)
 			response := RecommenderResponse{}
-			json.NewDecoder(http_response.Body).Decode(&response)
+			err = json.NewDecoder(http_response.Body).Decode(&response)
+			if err != nil {
+				t.Fatal(err)
+			}
 
 			assert.Len(t, response.Recommendations, expected[i], "Incorrect number of recommendations obtained, expected %d, got %d", expected[i], len(response.Recommendations))
 		}
