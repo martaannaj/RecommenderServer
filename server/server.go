@@ -29,13 +29,23 @@ type RecommendationOutputEntry struct {
 }
 
 // setupRecommender will setup a handler to recommend properties based on the list of properties and types.
-// It will return an array of recommendations with their respective probabilities.
-// No gloassary information is added to the response.
+// That handler will return an array of recommendations with their respective probabilities.
+// This array will contain at most `hardlimit` resutls. To not have a limit, set to -1.
 func setupLeanRecommender(
 	model *schematree.SchemaTree,
 	workflow *strategy.Workflow,
 	hardLimit int,
 ) func(http.ResponseWriter, *http.Request) {
+	if model == nil {
+		log.Panicln("Nil model specified")
+	}
+	if workflow == nil {
+		log.Panicln("Nil workflow specified")
+	}
+	if hardLimit < 1 || hardLimit != -1 {
+		log.Panic("")
+	}
+
 	return func(res http.ResponseWriter, req *http.Request) {
 
 		// Decode the JSON input and build a list of input strings
@@ -55,37 +65,11 @@ func setupLeanRecommender(
 
 		// Make a recommendation based on the assessed input and chosen strategy.
 		t1 := time.Now()
-		rec := workflow.Recommend(instance)
+		recomendations := workflow.Recommend(instance)
 		log.Println("request ", escapedjsonstring, " answered in ", time.Since(t1))
 
 		// Put a hard limit on the recommendations returned
-		propsCount := 0
-		limit := 0
-		for i, rec := range rec {
-			if rec.Property.IsProp() {
-				propsCount += 1
-				if propsCount >= hardLimit {
-					limit = i
-					break
-				}
-			}
-		}
-		if limit == 0 {
-			limit = len(rec) - 1
-		}
-		if len(rec) > limit {
-			rec = rec[:limit]
-		}
-
-		outputRecs := make([]RecommendationOutputEntry, propsCount-1)
-		i := 0
-		for _, rec := range rec {
-			if rec.Property.IsProp() {
-				outputRecs[i].PropertyStr = rec.Property.Str
-				outputRecs[i].Probability = rec.Probability
-				i += 1
-			}
-		}
+		outputRecs := limitRecommendations(recomendations, hardLimit)
 
 		// Pack everything into the response
 		recResp := RecommenderResponse{Recommendations: outputRecs}
@@ -98,6 +82,37 @@ func setupLeanRecommender(
 			return
 		}
 	}
+}
+
+func limitRecommendations(recomendations schematree.PropertyRecommendations, hardLimit int) []RecommendationOutputEntry {
+	propsCount := 0
+	limit := 0
+	for i, recommendation := range recomendations {
+		if recommendation.Property.IsProp() {
+			propsCount += 1
+			if propsCount >= hardLimit {
+				limit = i
+				break
+			}
+		}
+	}
+	if limit == 0 {
+		limit = len(recomendations) - 1
+	}
+	if len(recomendations) > limit {
+		recomendations = recomendations[:limit]
+	}
+
+	outputRecs := make([]RecommendationOutputEntry, propsCount-1)
+	i := 0
+	for _, rec := range recomendations {
+		if rec.Property.IsProp() {
+			outputRecs[i].PropertyStr = rec.Property.Str
+			outputRecs[i].Probability = rec.Probability
+			i += 1
+		}
+	}
+	return outputRecs
 }
 
 // SetupEndpoints configures a router with all necessary endpoints and their corresponding handlers.
