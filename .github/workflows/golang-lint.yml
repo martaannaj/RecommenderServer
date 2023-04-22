@@ -1,7 +1,7 @@
 name: golangci-lint
 on:
   schedule:
-  - cron: "0 0 * * 0"
+    - cron: "0 0 * * 0"
   push:
     tags:
       - v*
@@ -18,12 +18,16 @@ jobs:
     name: lint
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: "1.20"
+          cache: false
       - uses: actions/checkout@v2
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v3
         with:
           # Optional: version of golangci-lint to use in form of v1.2 or v1.2.3 or `latest` to use the latest version
-          version: 'latest'
+          version: "latest"
 
           # Optional: working directory, useful for monorepos
           # working-directory: somedir
