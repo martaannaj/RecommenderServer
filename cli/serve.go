@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -80,16 +81,22 @@ func CommandWikiServe() *cobra.Command {
 			// Initiate the HTTP server. Make it stop on <Enter> press.
 			router := server.SetupEndpoints(model, workflow, 500)
 
+			var server = &http.Server{
+				Addr:              fmt.Sprintf("0.0.0.0:%v", serveOnPort),
+				ReadHeaderTimeout: 5 * time.Second,
+				Handler:           router,
+			}
+
+			log.Printf("Now listening for https requests on 0.0.0.0:%v\n", serveOnPort)
+
 			if certFile != "" && keyFile != "" {
-				log.Printf("Now listening for https requests on 0.0.0.0:%v\n", serveOnPort)
-				err = http.ListenAndServeTLS(fmt.Sprintf("0.0.0.0:%v", serveOnPort), certFile, keyFile, router)
+				err = server.ListenAndServeTLS(certFile, keyFile)
 				if err != nil {
 					log.Panicln(err)
 				}
 			} else {
-				log.Printf("Now listening for http requests on 0.0.0.0:%v\n", serveOnPort)
-				// we do nto want semgrep to catch this because the option to use the server with TLS is provided, but not necessary in all environments
-				err = http.ListenAndServe(fmt.Sprintf("0.0.0.0:%v", serveOnPort), router) // nosemgrep: go.lang.security.audit.net.use-tls.use-tls
+				// we do not want semgrep to catch this because the option to use the server with TLS is provided, but not necessary in all environments
+				err = server.ListenAndServe() // nosemgrep: go.lang.security.audit.net.use-tls.use-tls
 				if err != nil {
 					log.Panicln(err)
 				}
