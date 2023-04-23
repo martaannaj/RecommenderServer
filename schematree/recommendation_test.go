@@ -53,15 +53,19 @@ func TestRecommendProperty(t *testing.T) {
 	pMap := tree.PropMap
 
 	t.Run("Only type property", func(t *testing.T) {
-		list := tree.RecommendProperty(IList{pMap.get("t#http://www.wikidata.org/entity/Q515")}) // City
-		assert.True(t, list.contains("http://www.wikidata.org/prop/direct/P17", 0.9))            // country
-		assert.True(t, list.contains("http://www.wikidata.org/prop/direct/P625", 0.9))           // coordinate location
+		p, ok := pMap.GetIfExisting("t#http://www.wikidata.org/entity/Q515")
+		assert.True(t, ok, "Expected property was not in the pmap")
+		list := tree.RecommendProperty(IList{p})                                       // City
+		assert.True(t, list.contains("http://www.wikidata.org/prop/direct/P17", 0.9))  // country
+		assert.True(t, list.contains("http://www.wikidata.org/prop/direct/P625", 0.9)) // coordinate location
 	})
 
 	t.Run("Only common property", func(t *testing.T) {
-		list := tree.RecommendProperty(IList{pMap.get("http://www.wikidata.org/prop/direct/P31")}) // InstanceOf
-		assert.False(t, list.contains("http://www.wikidata.org/prop/direct/P17", 0.5))             // country
-		assert.False(t, list.contains("http://www.wikidata.org/prop/direct/P625", 0.5))            // coordinate location
+		p, ok := pMap.GetIfExisting("http://www.wikidata.org/prop/direct/P31")
+		assert.True(t, ok, "Expected property was not in the pmap")
+		list := tree.RecommendProperty(IList{p})                                        // InstanceOf
+		assert.False(t, list.contains("http://www.wikidata.org/prop/direct/P17", 0.5))  // country
+		assert.False(t, list.contains("http://www.wikidata.org/prop/direct/P625", 0.5)) // coordinate location
 	})
 
 }

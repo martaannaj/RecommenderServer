@@ -6,12 +6,12 @@ import (
 	"RecommenderServer/strategy"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/pkg/errors"
 )
 
-//Layer defines configuration of one layer (condition, backoff pair) in the workflow
+// Layer defines configuration of one layer (condition, backoff pair) in the workflow
 type Layer struct {
 	Condition          string  // executed condition aboveThreshold, tooManyRecommendations,tooFewRecommendations
 	Backoff            string  // executed backoff splitProperty, deleteLowFrequency
@@ -23,16 +23,16 @@ type Layer struct {
 	ParallelExecutions int     // needed for deletelowfrequentitmes backoff
 }
 
-//Configuration defines one workflow configuration
+// Configuration defines one workflow configuration
 type Configuration struct {
 	Testset string  // testset to apply (only relevant for batch evaluation. Inrelevant for standard usage)
 	Layers  []Layer // layers to apply
 }
 
-//ReadConfigFile reads json config file <name> to Configuration struct
+// ReadConfigFile reads json config file <name> to Configuration struct
 func ReadConfigFile(name *string) (conf *Configuration, err error) {
 	var c Configuration
-	file, err := ioutil.ReadFile(*name)
+	file, err := os.ReadFile(*name)
 	if err != nil {
 		err = errors.Errorf("Read File failed")
 		return
@@ -42,7 +42,7 @@ func ReadConfigFile(name *string) (conf *Configuration, err error) {
 	return
 }
 
-//ConfigToWorkflow converts a configuration to a workflow
+// ConfigToWorkflow converts a configuration to a workflow
 func ConfigToWorkflow(config *Configuration, tree *schematree.SchemaTree) (wf *strategy.Workflow, err error) {
 	workflow := strategy.Workflow{}
 	for i, l := range config.Layers {

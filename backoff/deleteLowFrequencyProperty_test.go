@@ -54,9 +54,12 @@ func TestExecRecommender(t *testing.T) {
 	b.init(schema, 1, StepsizeLinear)
 	c := make(chan chanObject, 1)
 
-	prop1 := pMap["http://www.wikidata.org/prop/direct/P31"]
-	prop2 := pMap["http://www.wikidata.org/prop/direct/P21"]
-	prop3 := pMap["http://www.wikidata.org/prop/direct/P27"]
+	prop1, ok1 := pMap.GetIfExisting("http://www.wikidata.org/prop/direct/P31")
+	prop2, ok2 := pMap.GetIfExisting("http://www.wikidata.org/prop/direct/P21")
+	prop3, ok3 := pMap.GetIfExisting("http://www.wikidata.org/prop/direct/P27")
+	if !(ok1 && ok2 && ok3) {
+		t.Error("Expected properties were not in the propertyMap")
+	}
 	props := ST.IList{prop1, prop2, prop3}
 
 	removed := []*ST.IItem{}

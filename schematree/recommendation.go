@@ -54,7 +54,7 @@ func (tree *SchemaTree) BuildPropertyList(properties []string, types []string) I
 	list := []*IItem{}
 	// Find IItems of property strings
 	for _, pString := range properties {
-		p, ok := tree.PropMap[pString]
+		p, ok := tree.PropMap.GetIfExisting(pString)
 		if ok {
 			list = append(list, p)
 		}
@@ -63,7 +63,7 @@ func (tree *SchemaTree) BuildPropertyList(properties []string, types []string) I
 	// Find IItems of type strings
 	for _, tString := range types {
 		tString := "t#" + tString
-		p, ok := tree.PropMap[tString]
+		p, ok := tree.PropMap.GetIfExisting(tString)
 		if ok {
 			list = append(list, p)
 		}
@@ -139,8 +139,8 @@ func (tree *SchemaTree) RecommendProperty(properties IList) (ranked PropertyReco
 		// TODO: Race condition on propMap: fatal error: concurrent map iteration and map write
 		// fmt.Println(tree.Root.Support)
 		setSup := float64(tree.Root.Support) // empty set occured in all transactions
-		ranked = make([]RankedPropertyCandidate, len(tree.PropMap))
-		for _, prop := range tree.PropMap {
+		ranked = make([]RankedPropertyCandidate, tree.PropMap.Len())
+		for _, prop := range tree.PropMap.noWritersList_properties() {
 			ranked[int(prop.SortOrder)] = RankedPropertyCandidate{prop, float64(prop.TotalCount) / setSup}
 		}
 	}
@@ -208,8 +208,8 @@ func (tree *SchemaTree) RecommendPropertiesAndTypes(properties IList) (ranked Pr
 		// TODO: Race condition on propMap: fatal error: concurrent map iteration and map write
 		// fmt.Println(tree.Root.Support)
 		setSup := float64(tree.Root.Support) // empty set occured in all transactions
-		ranked = make([]RankedPropertyCandidate, len(tree.PropMap))
-		for _, prop := range tree.PropMap {
+		ranked = make([]RankedPropertyCandidate, tree.PropMap.Len())
+		for _, prop := range tree.PropMap.noWritersList_properties() {
 			ranked[int(prop.SortOrder)] = RankedPropertyCandidate{prop, float64(prop.TotalCount) / setSup}
 		}
 	}

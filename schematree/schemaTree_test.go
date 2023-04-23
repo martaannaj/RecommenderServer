@@ -27,7 +27,7 @@ func TestLoad(t *testing.T) {
 			log.Panic(err)
 		}
 		tree, _ := Load(f, false)
-		assert.EqualValues(t, 1497, len(tree.PropMap))
+		assert.EqualValues(t, 1497, tree.PropMap.Len())
 		assert.EqualValues(t, 1, tree.MinSup)
 		assert.True(t, tree.Typed)
 
@@ -39,7 +39,7 @@ func TestLoad(t *testing.T) {
 			log.Panic(err)
 		}
 		tree, _ := Load(f, false)
-		assert.EqualValues(t, 1242, len(tree.PropMap))
+		assert.EqualValues(t, 1242, tree.PropMap.Len())
 		assert.EqualValues(t, 1, tree.MinSup)
 		assert.False(t, tree.Typed)
 	})
