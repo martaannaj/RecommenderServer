@@ -3,6 +3,7 @@ package cli
 import (
 	"log"
 	"os"
+	"path/filepath"
 
 	"RecommenderServer/schematree"
 	"RecommenderServer/transactions"
@@ -45,7 +46,8 @@ func CommandWikiBuild() *cobra.Command {
 			var err error
 			switch export_format {
 			case "pb":
-				outputFile, err := os.Open(outputFileName + ".pb")
+				outputFileNameFull := filepath.Clean(filepath.Join(".", filepath.Clean(outputFileName+".pb")))
+				outputFile, err := os.Open(outputFileNameFull)
 				if err != nil {
 					log.Panic(err)
 				}
