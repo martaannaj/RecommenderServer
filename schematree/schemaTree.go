@@ -2,11 +2,11 @@ package schematree
 
 import (
 	"RecommenderServer/schematree/serialization"
+	"bufio"
 	"compress/gzip"
 	"encoding/gob"
 	"io"
 	"log"
-	"os"
 	"sort"
 	"strings"
 	"sync"
@@ -54,7 +54,7 @@ func (node *SchemaNode) getOrCreateChild(term *IItem) *SchemaNode {
 
 	// binary search for the child
 	globalNodeLocks[lock_for_node(node)].RLock()
-	children := node.Children
+	children := node.AllChildren
 	i := sort.Search(
 		len(children),
 		func(i int) bool {
@@ -74,14 +74,14 @@ func (node *SchemaNode) getOrCreateChild(term *IItem) *SchemaNode {
 	globalNodeLocks[lock_for_node(node)].Lock()
 
 	// search again, since child might meanwhile have been added by other thread or previous search might have missed
-	children = node.Children
+	children = node.AllChildren
 	i = sort.Search(
 		len(children),
 		func(i int) bool {
 			// nosemgrep: go.lang.security.audit.unsafe.use-of-unsafe-block
 			return uintptr(unsafe.Pointer(children[i].ID)) >= uintptr(unsafe.Pointer(term)) // #nosec G103 # The unsafe pointers are converted to uintptr and only used to create an ordering. They are never converted back to Pointers.
 		})
-	if i < len(node.Children) {
+	if i < len(node.AllChildren) {
 		if child := children[i]; child.ID == term {
 			globalNodeLocks[lock_for_node(node)].Unlock()
 			return child
@@ -91,14 +91,14 @@ func (node *SchemaNode) getOrCreateChild(term *IItem) *SchemaNode {
 	// child not found, but i is the index where it would be inserted.
 	// create a new one...
 	globalItemLocks[lock_for_term(term)].Lock()
-	newChild := &SchemaNode{term, node, [firstChildren]*SchemaNode{}, []*SchemaNode{}, term.traversalPointer, 0}
+	newChild := &SchemaNode{term, node, []*SchemaNode{}, term.traversalPointer, 0}
 	term.traversalPointer = newChild
 	globalItemLocks[lock_for_term(term)].Unlock()
 
 	// ...and insert it at position i
-	node.Children = append(node.Children, nil)
-	copy(node.Children[i+1:], node.Children[i:])
-	node.Children[i] = newChild
+	node.AllChildren = append(node.AllChildren, nil)
+	copy(node.AllChildren[i+1:], node.AllChildren[i:])
+	node.AllChildren[i] = newChild
 
 	globalNodeLocks[lock_for_node(node)].Unlock()
 
@@ -159,9 +159,9 @@ func (tree *SchemaTree) Support(properties IList) uint32 {
 	return support
 }
 
-func (tree *SchemaTree) SaveProtocolBuffer(filePath string) error {
+func (tree *SchemaTree) SaveProtocolBuffer(writer io.Writer) error {
 	t1 := time.Now()
-	log.Printf("Writing schema to protocol buffer file %v... ", filePath)
+	//	log.Printf("Writing schema to protocol buffer file %v... ", filePath)
 
 	pb_tree := &serialization.SchemaTree{}
 
@@ -206,19 +206,17 @@ func (tree *SchemaTree) SaveProtocolBuffer(filePath string) error {
 	}
 	// TODO check whether gzip compression helps
 
-	if err := os.WriteFile(filePath, out, 0600); err != nil {
-		log.Fatalln("Failed to write the protocol buffer tree", err)
-	}
+	buf_writer := bufio.NewWriter(writer)
 
-	if err == nil {
-		log.Printf("done (%v)\n", time.Since(t1))
-	} else {
-		log.Printf("Saving schema failed with error: %v\n", err)
+	nn, err := buf_writer.Write(out)
+	if err != nil || nn != len(out) {
+		log.Panicf("Could not write all output to the file. Error %s , written %d", err, nn)
 	}
-	return err
+	log.Printf("done (%v)\n", time.Since(t1))
+	return nil
 }
 
-func LoadProtocolBuffer(input io.Reader) (*SchemaTree, error) {
+func LoadProtocolBufferFromReader(input io.Reader) (*SchemaTree, error) {
 	log.Println("Start loading schema (protocol buffer format)")
 	in, err := io.ReadAll(input)
 	if err != nil {

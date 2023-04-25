@@ -50,7 +50,7 @@ func CommandWikiServe() *cobra.Command {
 				log.Panic(err)
 			}
 
-			model, err := schematree.LoadProtocolBuffer(f)
+			model, err := schematree.LoadProtocolBufferFromReader(f)
 			if err != nil {
 				log.Panicln(err)
 			}
