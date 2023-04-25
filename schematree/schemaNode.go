@@ -7,33 +7,30 @@ import (
 	"sync/atomic"
 )
 
-const firstChildren = 1
-
 // SchemaNode is a nodes of the Schema FP-Tree
 type SchemaNode struct {
-	ID            *IItem
-	parent        *SchemaNode
-	FirstChildren [firstChildren]*SchemaNode
-	Children      []*SchemaNode
-	nextSameID    *SchemaNode // node traversal pointer
-	Support       uint32      // total frequency of the node in the path
+	ID         *IItem
+	parent     *SchemaNode
+	Children   []*SchemaNode
+	nextSameID *SchemaNode // node traversal pointer
+	Support    uint32      // total frequency of the node in the path
 }
 
-//newRootNode creates a new root node for a given propMap
+// newRootNode creates a new root node for a given propMap
 func newRootNode(pMap propMap) SchemaNode {
-	return SchemaNode{pMap.Get_or_create("root"), nil, [firstChildren]*SchemaNode{}, []*SchemaNode{}, nil, 0}
+	return SchemaNode{pMap.Get_or_create("root"), nil, []*SchemaNode{}, nil, 0}
 }
 
 const lockPrime = 97 // arbitrary prime number
 var globalItemLocks [lockPrime]*sync.Mutex
 var globalNodeLocks [lockPrime]*sync.RWMutex
 
-//incrementSupport increments the support of the schema node by one
+// incrementSupport increments the support of the schema node by one
 func (node *SchemaNode) incrementSupport() {
 	atomic.AddUint32(&node.Support, 1)
 }
 
-//convert the SchemaNode into a Protocolbuffer schemanode
+// convert the SchemaNode into a Protocolbuffer schemanode
 func (node *SchemaNode) AsProtoSchemaNode() *serialization.SchemaNode {
 
 	pb_node := serialization.SchemaNode{
@@ -104,30 +101,13 @@ func (node *SchemaNode) decodeGob(d *gob.Decoder, props []*IItem) error {
 		return err
 	}
 
-	var remainder = 0
-	if length >= firstChildren {
-		remainder = length - firstChildren
-		length = firstChildren
-	}
-
 	for i := 0; i < length; i++ {
-		node.FirstChildren[i] = &SchemaNode{nil, node, [firstChildren]*SchemaNode{}, nil, nil, 0}
-		err = node.FirstChildren[i].decodeGob(d, props)
-
+		child := &SchemaNode{nil, node, nil, nil, 0}
+		err = child.decodeGob(d, props)
 		if err != nil {
 			return err
 		}
-	}
-
-	node.Children = make([]*SchemaNode, remainder)
-
-	for i := 0; i < remainder; i++ {
-		node.Children[i] = &SchemaNode{nil, node, [firstChildren]*SchemaNode{}, nil, nil, 0}
-		err = node.Children[i].decodeGob(d, props)
-
-		if err != nil {
-			return err
-		}
+		node.Children = append(node.Children, child)
 	}
 
 	return nil

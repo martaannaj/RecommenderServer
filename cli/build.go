@@ -2,6 +2,7 @@ package cli
 
 import (
 	"log"
+	"os"
 
 	"RecommenderServer/schematree"
 	"RecommenderServer/transactions"
@@ -44,7 +45,14 @@ func CommandWikiBuild() *cobra.Command {
 			var err error
 			switch export_format {
 			case "pb":
-				err = schema.SaveProtocolBuffer(outputFileName + ".pb")
+				outputFile, err := os.Open(outputFileName + ".pb")
+				if err != nil {
+					log.Panic(err)
+				}
+				err = schema.SaveProtocolBuffer(outputFile)
+				if err != nil {
+					log.Panicln(err)
+				}
 			default:
 				log.Panic("Format not reconized")
 

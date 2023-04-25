@@ -15,7 +15,7 @@ type BackoffSplitPropertySet struct {
 	merger   func([]ST.PropertyRecommendations) ST.PropertyRecommendations // Merge the property list
 }
 
-//splits into two sublists. "Equal" mixture of high and low support properties in both sets.
+// splits into two sublists. "Equal" mixture of high and low support properties in both sets.
 var EverySecondItemSplitter = func(properties ST.IList) (sublists []ST.IList) {
 	properties.Sort()
 	sublists = make([]ST.IList, 2)
@@ -110,7 +110,7 @@ func (strat *BackoffSplitPropertySet) init(pTree *ST.SchemaTree, pSplitter func(
 	strat.merger = pMerger
 }
 
-//Recommend a propertyRecommendations list with the delete low Frequency Property Backoff strategy
+// Recommend a propertyRecommendations list with the delete low Frequency Property Backoff strategy
 func (strat *BackoffSplitPropertySet) Recommend(propertyList ST.IList) (ranked ST.PropertyRecommendations) {
 	sublists := strat.splitter(propertyList)
 	recommendations := strat.recommendInPrallel(sublists)

@@ -2,11 +2,11 @@ package schematree
 
 import (
 	"RecommenderServer/schematree/serialization"
+	"bufio"
 	"compress/gzip"
 	"encoding/gob"
 	"io"
 	"log"
-	"os"
 	"sort"
 	"strings"
 	"sync"
@@ -91,7 +91,7 @@ func (node *SchemaNode) getOrCreateChild(term *IItem) *SchemaNode {
 	// child not found, but i is the index where it would be inserted.
 	// create a new one...
 	globalItemLocks[lock_for_term(term)].Lock()
-	newChild := &SchemaNode{term, node, [firstChildren]*SchemaNode{}, []*SchemaNode{}, term.traversalPointer, 0}
+	newChild := &SchemaNode{term, node, []*SchemaNode{}, term.traversalPointer, 0}
 	term.traversalPointer = newChild
 	globalItemLocks[lock_for_term(term)].Unlock()
 
@@ -159,9 +159,9 @@ func (tree *SchemaTree) Support(properties IList) uint32 {
 	return support
 }
 
-func (tree *SchemaTree) SaveProtocolBuffer(filePath string) error {
+func (tree *SchemaTree) SaveProtocolBuffer(writer io.Writer) error {
 	t1 := time.Now()
-	log.Printf("Writing schema to protocol buffer file %v... ", filePath)
+	//	log.Printf("Writing schema to protocol buffer file %v... ", filePath)
 
 	pb_tree := &serialization.SchemaTree{}
 
@@ -206,19 +206,17 @@ func (tree *SchemaTree) SaveProtocolBuffer(filePath string) error {
 	}
 	// TODO check whether gzip compression helps
 
-	if err := os.WriteFile(filePath, out, 0600); err != nil {
-		log.Fatalln("Failed to write the protocol buffer tree", err)
-	}
+	buf_writer := bufio.NewWriter(writer)
 
-	if err == nil {
-		log.Printf("done (%v)\n", time.Since(t1))
-	} else {
-		log.Printf("Saving schema failed with error: %v\n", err)
+	nn, err := buf_writer.Write(out)
+	if err != nil || nn != len(out) {
+		log.Panicf("Could not write all output to the file. Error %s , written %d", err, nn)
 	}
-	return err
+	log.Printf("done (%v)\n", time.Since(t1))
+	return nil
 }
 
-func LoadProtocolBuffer(input io.Reader) (*SchemaTree, error) {
+func LoadProtocolBufferFromReader(input io.Reader) (*SchemaTree, error) {
 	log.Println("Start loading schema (protocol buffer format)")
 	in, err := io.ReadAll(input)
 	if err != nil {

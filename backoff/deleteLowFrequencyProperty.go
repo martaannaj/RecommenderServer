@@ -53,7 +53,7 @@ func (strat *BackoffDeleteLowFrequencyItems) init(pTree *ST.SchemaTree, pParalle
 	strat.stepsize = pStepsize
 }
 
-//Recommend a propertyRecommendations list with the delete low Frequency Property Backoff strategy
+// Recommend a propertyRecommendations list with the delete low Frequency Property Backoff strategy
 func (strat *BackoffDeleteLowFrequencyItems) Recommend(propertyList ST.IList) (ranked ST.PropertyRecommendations) {
 	sublists, removelists := strat.split(propertyList)
 	ranked = strat.recommendInParrallel(sublists, removelists)
@@ -83,7 +83,7 @@ func (strat *BackoffDeleteLowFrequencyItems) split(propertyList ST.IList) (subli
 	return
 }
 
-//Delete the last i ites in the property list, by slicing. No values of the underlying array are touched. If len(propertyList) is smaller than i then an error will be returned
+// Delete the last i ites in the property list, by slicing. No values of the underlying array are touched. If len(propertyList) is smaller than i then an error will be returned
 func (strat *BackoffDeleteLowFrequencyItems) manipulate(propertyList ST.IList, i int) (reducedPropertyList, removedPropertyList ST.IList, err error) {
 	if len(propertyList) < i {
 		reducedPropertyList = nil

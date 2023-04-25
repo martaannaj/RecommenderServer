@@ -14,7 +14,7 @@ func MakeAlwaysCondition() Condition {
 	}
 }
 
-//Not needed anylonger
+// Not needed anylonger
 // Helper method to create the above-threshold condition.
 func MakeAboveThresholdCondition(threshold int) Condition {
 	return func(asm *schematree.Instance) bool {
@@ -28,7 +28,7 @@ func MakeBelowThresholdCondition(threshold int) Condition {
 	}
 }
 
-//Not needed anylonger
+// Not needed anylonger
 // Helper Method to create too-many-recommendations-condition: When the standard recommender returns more than count many recommendations the condition is true, else false
 func MakeTooManyRecommendationsCondition(threshold int) Condition {
 	return func(asm *schematree.Instance) bool {
