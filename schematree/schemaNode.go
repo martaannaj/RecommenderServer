@@ -7,8 +7,6 @@ import (
 	"sync/atomic"
 )
 
-const firstChildren = 1
-
 // SchemaNode is a nodes of the Schema FP-Tree
 type SchemaNode struct {
 	ID         *IItem
@@ -105,7 +103,10 @@ func (node *SchemaNode) decodeGob(d *gob.Decoder, props []*IItem) error {
 
 	for i := 0; i < length; i++ {
 		child := &SchemaNode{nil, node, nil, nil, 0}
-		child.decodeGob(d, props)
+		err = child.decodeGob(d, props)
+		if err != nil {
+			return err
+		}
 		node.Children = append(node.Children, child)
 	}
 

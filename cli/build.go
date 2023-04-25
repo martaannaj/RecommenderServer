@@ -50,6 +50,9 @@ func CommandWikiBuild() *cobra.Command {
 					log.Panic(err)
 				}
 				err = schema.SaveProtocolBuffer(outputFile)
+				if err != nil {
+					log.Panicln(err)
+				}
 			default:
 				log.Panic("Format not reconized")
 
