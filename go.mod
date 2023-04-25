@@ -13,11 +13,11 @@ require (
 
 require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
-	github.com/ProtonMail/go-crypto v0.0.0-20230417170513-8ee5748c52b5 // indirect
+	github.com/ProtonMail/go-crypto v0.0.0-20230424174541-a2e3b023bd29 // indirect
 	github.com/PuerkitoBio/goquery v1.8.1 // indirect
 	github.com/acomagu/bufpipe v1.0.4 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
-	github.com/benbjohnson/clock v1.3.1 // indirect
+	github.com/benbjohnson/clock v1.3.3 // indirect
 	github.com/cloudflare/circl v1.3.2 // indirect
 	github.com/cosnicolaou/pbzip2 v1.0.2-0.20211229030036-3ed02fdb7541 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
