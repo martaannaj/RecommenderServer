@@ -93,3 +93,15 @@ In an untrusted environment, one shall use TLS to protect the network traffic to
 
 semgrep raises a warning for the fact that this server has the option to run without TLS. This warning has been suppressed.
 
+## Compiling the protocol buffer files
+
+The serialization uses protocol buffers. The files needed are precompiled in the repository.
+If changes are made, you can recompile. As follows:
+
+1. get the protoc binary from https://github.com/protocolbuffers/protobuf
+2. install the go specific generator ```go install google.golang.org/protobuf/cmd/protoc-gen-go@latest```, make sure it is on your path.
+3. Compile using 
+
+```bash
+protoc  --go_out=.  schematree/serialization/schematree.proto
+```
