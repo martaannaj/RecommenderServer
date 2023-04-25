@@ -159,6 +159,14 @@ func (tree *SchemaTree) Support(properties IList) uint32 {
 	return support
 }
 
+func (tree *SchemaTree) AllProperties() []string {
+	all_properties := make([]string, 0)
+	for prop := range tree.PropMap.prop {
+		all_properties = append(all_properties, prop)
+	}
+	return all_properties
+}
+
 func (tree *SchemaTree) SaveProtocolBuffer(writer io.Writer) error {
 	t1 := time.Now()
 	//	log.Printf("Writing schema to protocol buffer file %v... ", filePath)

@@ -30,7 +30,7 @@ func TestLoad(t *testing.T) {
 		assert.EqualValues(t, 1497, tree.PropMap.Len())
 		assert.EqualValues(t, 1, tree.MinSup)
 		assert.True(t, tree.Typed)
-
+		assert.Len(t, tree.AllProperties(), 1497)
 	})
 	t.Run("UnTypedSchemaTree", func(t *testing.T) {
 		f, err := os.Open(treePath)
@@ -42,6 +42,7 @@ func TestLoad(t *testing.T) {
 		assert.EqualValues(t, 1242, tree.PropMap.Len())
 		assert.EqualValues(t, 1, tree.MinSup)
 		assert.False(t, tree.Typed)
+		assert.Len(t, tree.AllProperties(), 1242)
 	})
 
 }
