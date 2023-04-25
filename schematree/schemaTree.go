@@ -54,7 +54,7 @@ func (node *SchemaNode) getOrCreateChild(term *IItem) *SchemaNode {
 
 	// binary search for the child
 	globalNodeLocks[lock_for_node(node)].RLock()
-	children := node.AllChildren
+	children := node.Children
 	i := sort.Search(
 		len(children),
 		func(i int) bool {
@@ -74,14 +74,14 @@ func (node *SchemaNode) getOrCreateChild(term *IItem) *SchemaNode {
 	globalNodeLocks[lock_for_node(node)].Lock()
 
 	// search again, since child might meanwhile have been added by other thread or previous search might have missed
-	children = node.AllChildren
+	children = node.Children
 	i = sort.Search(
 		len(children),
 		func(i int) bool {
 			// nosemgrep: go.lang.security.audit.unsafe.use-of-unsafe-block
 			return uintptr(unsafe.Pointer(children[i].ID)) >= uintptr(unsafe.Pointer(term)) // #nosec G103 # The unsafe pointers are converted to uintptr and only used to create an ordering. They are never converted back to Pointers.
 		})
-	if i < len(node.AllChildren) {
+	if i < len(node.Children) {
 		if child := children[i]; child.ID == term {
 			globalNodeLocks[lock_for_node(node)].Unlock()
 			return child
@@ -96,9 +96,9 @@ func (node *SchemaNode) getOrCreateChild(term *IItem) *SchemaNode {
 	globalItemLocks[lock_for_term(term)].Unlock()
 
 	// ...and insert it at position i
-	node.AllChildren = append(node.AllChildren, nil)
-	copy(node.AllChildren[i+1:], node.AllChildren[i:])
-	node.AllChildren[i] = newChild
+	node.Children = append(node.Children, nil)
+	copy(node.Children[i+1:], node.Children[i:])
+	node.Children[i] = newChild
 
 	globalNodeLocks[lock_for_node(node)].Unlock()
 

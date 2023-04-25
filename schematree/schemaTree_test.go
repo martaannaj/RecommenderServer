@@ -118,8 +118,8 @@ func depthFirstCompare(t *testing.T, left *SchemaNode, right *SchemaNode) {
 	} else {
 		assert.EqualValues(t, left.parent.ID.Str, right.parent.ID.Str)
 	}
-	leftChildren := left.AllChildren
-	rightChildren := right.AllChildren
+	leftChildren := left.Children
+	rightChildren := right.Children
 	assert.EqualValues(t, len(leftChildren), len(rightChildren), "Unequal number of children, got %d and %d", len(leftChildren), len(rightChildren))
 	for i, leftChild := range leftChildren {
 		rightChild := rightChildren[i]

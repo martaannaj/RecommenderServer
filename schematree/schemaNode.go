@@ -11,11 +11,11 @@ const firstChildren = 1
 
 // SchemaNode is a nodes of the Schema FP-Tree
 type SchemaNode struct {
-	ID          *IItem
-	parent      *SchemaNode
-	AllChildren []*SchemaNode
-	nextSameID  *SchemaNode // node traversal pointer
-	Support     uint32      // total frequency of the node in the path
+	ID         *IItem
+	parent     *SchemaNode
+	Children   []*SchemaNode
+	nextSameID *SchemaNode // node traversal pointer
+	Support    uint32      // total frequency of the node in the path
 }
 
 // newRootNode creates a new root node for a given propMap
@@ -41,7 +41,7 @@ func (node *SchemaNode) AsProtoSchemaNode() *serialization.SchemaNode {
 	}
 
 	// Children
-	for _, child := range node.AllChildren {
+	for _, child := range node.Children {
 		pb_child := child.AsProtoSchemaNode()
 		pb_node.Children = append(pb_node.Children, pb_child)
 	}
@@ -68,7 +68,7 @@ func FromProtoSchemaNode(pb_node *serialization.SchemaNode, props []*IItem) *Sch
 	for _, pb_child := range pb_node.Children {
 		child := FromProtoSchemaNode(pb_child, props)
 		child.parent = node
-		node.AllChildren = append(node.AllChildren, child)
+		node.Children = append(node.Children, child)
 	}
 
 	return node
@@ -106,7 +106,7 @@ func (node *SchemaNode) decodeGob(d *gob.Decoder, props []*IItem) error {
 	for i := 0; i < length; i++ {
 		child := &SchemaNode{nil, node, nil, nil, 0}
 		child.decodeGob(d, props)
-		node.AllChildren = append(node.AllChildren, child)
+		node.Children = append(node.Children, child)
 	}
 
 	return nil

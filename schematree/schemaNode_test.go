@@ -23,7 +23,7 @@ func emptyRootNodeTest(t *testing.T, root SchemaNode) {
 	assert.NotNil(t, root.ID, "schemaNode ID is nil")
 	assert.Equal(t, "root", *root.ID.Str, "iri of root node is not \"root\"")
 	assert.Nil(t, root.parent, "parent of root not nil")
-	assert.Equal(t, 0, len(root.AllChildren), "root node should have a constant number of first children")
+	assert.Equal(t, 0, len(root.Children), "root node should have a constant number of first children")
 }
 
 func TestNewRootNode(t *testing.T) {
