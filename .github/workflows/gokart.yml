@@ -1,9 +1,8 @@
 name: GoKart
 
-
 on:
   schedule:
-  - cron: "0 0 * * 0"
+    - cron: "0 0 * * 0"
   push:
     branches:
       - master
@@ -12,6 +11,7 @@ on:
     branches:
       - master
       - main
+  workflow_dispatch:
 
 jobs:
   gokart:
@@ -22,17 +22,16 @@ jobs:
       security-events: write
 
     steps:
-    - name: Checkout the code
-      uses: actions/checkout@v2
+      - name: Checkout the code
+        uses: actions/checkout@v2
 
-    - name: Run GoKart
-      uses: kitabisa/gokart-action@v1.0.0
-      with:
-        globalsTainted: true
-        output: results.sarif
+      - name: Run GoKart
+        uses: kitabisa/gokart-action@v1.0.0
+        with:
+          globalsTainted: true
+          output: results.sarif
 
-    - name: Upload GoKart results
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: results.sarif
-
+      - name: Upload GoKart results
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: results.sarif

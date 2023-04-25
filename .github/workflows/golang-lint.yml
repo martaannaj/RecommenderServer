@@ -9,6 +9,11 @@ on:
       - master
       - main
   pull_request:
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+
 permissions:
   contents: read
   # Optional: allow read access to pull request. Use with `only-new-issues` option.
