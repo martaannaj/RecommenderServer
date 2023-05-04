@@ -36,6 +36,7 @@ func (node *SchemaNode) AsProtoSchemaNode() *serialization.SchemaNode {
 	pb_node := serialization.SchemaNode{
 		SortOrder: node.ID.SortOrder,
 		Support:   node.Support,
+		Children:  make([]*serialization.SchemaNode, 0, len(node.Children)),
 	}
 
 	// Children
