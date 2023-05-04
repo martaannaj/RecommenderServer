@@ -2,7 +2,6 @@ package schematree
 
 import (
 	"RecommenderServer/schematree/serialization"
-	"bufio"
 	"compress/gzip"
 	"encoding/gob"
 	"io"
@@ -214,13 +213,12 @@ func (tree *SchemaTree) SaveProtocolBuffer(writer io.Writer) error {
 	}
 	// TODO check whether gzip compression helps
 
-	buf_writer := bufio.NewWriter(writer)
-
-	nn, err := buf_writer.Write(out)
+	nn, err := writer.Write(out)
 	if err != nil || nn != len(out) {
 		log.Panicf("Could not write all output to the file. Error %s , written %d", err, nn)
 	}
 	log.Printf("done (%v)\n", time.Since(t1))
+
 	return nil
 }
 

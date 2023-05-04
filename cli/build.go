@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"bufio"
 	"log"
 	"os"
 	"path/filepath"
@@ -51,7 +52,13 @@ func CommandWikiBuild() *cobra.Command {
 				if err != nil {
 					log.Panic(err)
 				}
-				err = schema.SaveProtocolBuffer(outputFile)
+				buf_writer := bufio.NewWriter(outputFile)
+
+				err = schema.SaveProtocolBuffer(buf_writer)
+				if err != nil {
+					log.Panicln(err)
+				}
+				err = buf_writer.Flush()
 				if err != nil {
 					log.Panicln(err)
 				}
