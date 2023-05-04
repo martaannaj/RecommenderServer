@@ -48,6 +48,7 @@ func CommandWikiBuild() *cobra.Command {
 			case "pb":
 				outputFileNameFull := filepath.Clean(filepath.Join(".", filepath.Clean(outputFileName+".pb")))
 				outputFile, err := os.Open(outputFileNameFull)
+				defer outputFile.Close()
 				if err != nil {
 					log.Panic(err)
 				}
