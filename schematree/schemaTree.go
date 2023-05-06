@@ -36,6 +36,7 @@ func New(typed bool, minSup uint32) (tree *SchemaTree) {
 		MinSup:  minSup,
 		Typed:   typed,
 	}
+	tree.Root.ID.traversalPointer = &tree.Root
 	tree.init()
 	return
 }
