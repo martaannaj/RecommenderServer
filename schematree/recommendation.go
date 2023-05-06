@@ -100,7 +100,7 @@ func (tree *SchemaTree) RecommendProperty(properties IList) (ranked PropertyReco
 		// walk from each "leaf" instance of that property towards the root...
 		for leaf := rarestProperty.traversalPointer; leaf != nil; leaf = leaf.nextSameID { // iterate all instances for that property
 			if leaf.prefixContains(properties) {
-				setSupport += uint64(leaf.Support) // number of occuences of this set of properties in the current branch
+				setSupport += uint64(leaf.Support) // number of occurences of this set of properties in the current branch
 
 				// walk up
 				for cur := leaf; cur.parent != nil; cur = cur.parent {

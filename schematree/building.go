@@ -31,7 +31,7 @@ var commonProps = map[string]struct{}{
 	"P131":  void,
 }
 
-// Create creates a new schema tree from given dataset
+// Create creates a new schema tree from given transactionSource
 func Create(sourceProvider transactions.TransactionSource) *SchemaTree {
 
 	schema := New(true, 0)

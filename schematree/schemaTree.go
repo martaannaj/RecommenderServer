@@ -231,6 +231,9 @@ func LoadProtocolBufferFromReader(input io.Reader) (*SchemaTree, error) {
 	return loadProtocolBuffer(in)
 }
 
+/*
+Load a schematree from the protocol buffer representation.
+*/
 func loadProtocolBuffer(in []byte) (*SchemaTree, error) {
 	t1 := time.Now()
 	pb_tree := &serialization.SchemaTree{}
