@@ -51,6 +51,13 @@ func TestLoad(t *testing.T) {
 
 func TestSaveLoadProtocolBuffer(t *testing.T) {
 
+	var allNodesHaveItem func(node *SchemaNode)
+	allNodesHaveItem = func(node *SchemaNode) {
+		assert.NotNil(t, node.ID)
+		for _, child := range node.Children {
+			allNodesHaveItem(child)
+		}
+	}
 	t.Run("Save large schematree with protocol buffers and load back", func(t *testing.T) {
 		original_input_file, err := os.Open(treePathTyped)
 		if err != nil {
@@ -58,6 +65,8 @@ func TestSaveLoadProtocolBuffer(t *testing.T) {
 			log.Panic(err)
 		}
 		original_tree, _ := Load(original_input_file, false)
+
+		allNodesHaveItem(t, &original_tree.Root)
 		// store
 		proto_file, err := os.CreateTemp("", "schemaTree_test_protocol_buffer")
 		if err != nil {
