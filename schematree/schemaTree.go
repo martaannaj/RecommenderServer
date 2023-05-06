@@ -339,10 +339,9 @@ func Load(f io.Reader, stripURI bool) (*SchemaTree, error) {
 		return nil, err
 	}
 
-	// legacy import bug workaround
-	if *tree.Root.ID.Str != "root" {
-		log.Println("WARNING!!! Encountered legacy root node import bug - root node counts will be incorrect!")
-		tree.Root.ID = tree.PropMap.Get_or_create("root")
+	// legacy import is no longer supported.
+	if !strings.HasPrefix(*tree.Root.ID.Str, "root") {
+		log.Panicln("The loaded model does not contain a root node. Such models are no longer supported.")
 	}
 
 	//decode Typed
