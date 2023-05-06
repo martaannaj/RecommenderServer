@@ -3,8 +3,12 @@ package schematree
 import (
 	"RecommenderServer/schematree/serialization"
 	"encoding/gob"
+	"log"
+	"math"
 	"sync"
 	"sync/atomic"
+
+	"github.com/google/uuid"
 )
 
 // SchemaNode is a nodes of the Schema FP-Tree
@@ -17,8 +21,17 @@ type SchemaNode struct {
 }
 
 // newRootNode creates a new root node for a given propMap
-func newRootNode(pMap propMap) SchemaNode {
-	return SchemaNode{pMap.Get_or_create("root"), nil, []*SchemaNode{}, nil, 0}
+// The node has its own IItem, but the traversalPointer for the IItem is not yet set
+func newRootNode() SchemaNode {
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		log.Panic("failed to create a random UUID", err)
+	}
+	rootID := "root" + uuid.String()
+	rootItem := &IItem{&rootID, 0, math.MaxUint32, nil}
+
+	rootNode := SchemaNode{rootItem, nil, []*SchemaNode{}, nil, 0}
+	return rootNode
 }
 
 const lockPrime = 97 // arbitrary prime number

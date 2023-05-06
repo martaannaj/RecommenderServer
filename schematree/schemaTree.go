@@ -32,7 +32,7 @@ func New(typed bool, minSup uint32) (tree *SchemaTree) {
 	pMap := NewPropMap()
 	tree = &SchemaTree{
 		PropMap: pMap,
-		Root:    newRootNode(pMap),
+		Root:    newRootNode(),
 		MinSup:  minSup,
 		Typed:   typed,
 	}

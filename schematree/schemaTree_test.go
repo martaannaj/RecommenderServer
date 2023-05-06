@@ -14,8 +14,10 @@ var treePathTyped = "../testdata/10M.nt.gz.schemaTree.typed.bin"
 
 func TestSchemaTree(t *testing.T) {
 	tree := New(false, 0)
-	t.Run("Root is a proper empty root node", func(t *testing.T) { emptyRootNodeTest(t, tree.Root) })
-
+	t.Run("Root is a proper empty root node", func(t *testing.T) {
+		emptyRootNodeTest(t, tree.Root)
+		assert.Equal(t, tree.Root.ID.traversalPointer, &tree.Root, "For any tree, the traversalPointer for the root node must be the root node itself.")
+	})
 }
 
 func TestLoad(t *testing.T) {
