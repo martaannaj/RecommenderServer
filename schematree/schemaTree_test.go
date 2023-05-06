@@ -26,7 +26,8 @@ func TestLoad(t *testing.T) {
 			log.Printf("Encountered error while trying to open the file: %v\n", err)
 			log.Panic(err)
 		}
-		tree, _ := Load(f, false)
+		tree, err := Load(f, false)
+		assert.NoError(t, err, "An error occured restoring the schematree.")
 		assert.EqualValues(t, 1497, tree.PropMap.Len())
 		assert.EqualValues(t, 1, tree.MinSup)
 		assert.True(t, tree.Typed)
@@ -38,7 +39,8 @@ func TestLoad(t *testing.T) {
 			log.Printf("Encountered error while trying to open the file: %v\n", err)
 			log.Panic(err)
 		}
-		tree, _ := Load(f, false)
+		tree, err := Load(f, false)
+		assert.NoError(t, err, "An error occured restoring the schematree.")
 		assert.EqualValues(t, 1242, tree.PropMap.Len())
 		assert.EqualValues(t, 1, tree.MinSup)
 		assert.False(t, tree.Typed)
