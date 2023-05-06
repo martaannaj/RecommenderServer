@@ -49,15 +49,15 @@ func TestLoad(t *testing.T) {
 
 }
 
+func allNodesHaveItem(t *testing.T, node *SchemaNode) {
+	assert.NotNil(t, node.ID)
+	for _, child := range node.Children {
+		allNodesHaveItem(t, child)
+	}
+}
+
 func TestSaveLoadProtocolBuffer(t *testing.T) {
 
-	var allNodesHaveItem func(node *SchemaNode)
-	allNodesHaveItem = func(node *SchemaNode) {
-		assert.NotNil(t, node.ID)
-		for _, child := range node.Children {
-			allNodesHaveItem(child)
-		}
-	}
 	t.Run("Save large schematree with protocol buffers and load back", func(t *testing.T) {
 		original_input_file, err := os.Open(treePathTyped)
 		if err != nil {
@@ -116,23 +116,40 @@ func TestSaveLoadProtocolBuffer(t *testing.T) {
 //		nextSameID    *SchemaNode // node traversal pointer
 //		Support       uint32      // total frequency of the node in the path
 //	}
+
+// make sure that each node is reachable from a chain
+func checkReachableFrom(t *testing.T, from *SchemaNode, target *SchemaNode) {
+	for traverser := from; traverser != nil; traverser = traverser.nextSameID {
+		if traverser.ID == target.ID {
+			return
+		}
+	}
+	assert.Failf(t, "node not reachable", "The node %v is not reachable from %v", target, from)
+}
+
 func depthFirstCompare(t *testing.T, left *SchemaNode, right *SchemaNode) {
 	assert.EqualValues(t, left.ID.Str, right.ID.Str)
-	if left.nextSameID == nil {
-		assert.True(t, right.nextSameID == nil)
-	} else {
-		assert.EqualValues(t, left.nextSameID.ID.Str, right.nextSameID.ID.Str)
-	}
+	assert.EqualValues(t, left.ID.TotalCount, right.ID.TotalCount)
+	assert.EqualValues(t, left.ID.SortOrder, right.ID.SortOrder)
+
 	assert.EqualValues(t, left.Support, right.Support)
 
+	assert.NotNil(t, left.ID.traversalPointer)
+	assert.NotNil(t, right.ID.traversalPointer)
+
+	// Make sure they are on their own their own chain
+	checkReachableFrom(t, left, left.ID.traversalPointer)
+	checkReachableFrom(t, right, right.ID.traversalPointer)
+
 	if left.parent == nil {
-		assert.True(t, right.parent == nil)
+		assert.Nil(t, right.parent)
 	} else {
 		assert.EqualValues(t, left.parent.ID.Str, right.parent.ID.Str)
 	}
 	leftChildren := left.Children
 	rightChildren := right.Children
 	assert.EqualValues(t, len(leftChildren), len(rightChildren), "Unequal number of children, got %d and %d", len(leftChildren), len(rightChildren))
+	// The order for serialization should be stable
 	for i, leftChild := range leftChildren {
 		rightChild := rightChildren[i]
 		depthFirstCompare(t, leftChild, rightChild)
