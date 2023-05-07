@@ -1,6 +1,7 @@
 package schematree
 
 import (
+	"strings"
 	"sync/atomic"
 	"testing"
 
@@ -21,14 +22,17 @@ func testPropertyMap() propMap {
 func emptyRootNodeTest(t *testing.T, root SchemaNode) {
 
 	assert.NotNil(t, root.ID, "schemaNode ID is nil")
-	assert.Equal(t, "root", *root.ID.Str, "iri of root node is not \"root\"")
+	assert.True(t, strings.HasPrefix(*root.ID.Str, "root"), "ID of root node does not start with \"root\"")
 	assert.Nil(t, root.parent, "parent of root not nil")
 	assert.Equal(t, 0, len(root.Children), "root node should have a constant number of first children")
+
 }
 
 func TestNewRootNode(t *testing.T) {
-	root := newRootNode(testPropertyMap())
+	root := newRootNode()
 	emptyRootNodeTest(t, root)
+	// When not in a tree yet, the traversalPinter must be nil
+	assert.Nil(t, root.ID.traversalPointer)
 }
 
 func TestIncrementSupport(t *testing.T) {

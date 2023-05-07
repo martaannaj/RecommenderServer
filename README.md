@@ -22,7 +22,7 @@ Other requests, such as feature requests, or suggestions can be filed on github.
 ./RecommenderServer serve ./testdata/latest-truthy-item-filtered-sorted.nt.gz.schemaTree.typed.bin
 
 # Test with a request
-curl -d '{"properties":["local://prop/Color"],"types":[]}' http://localhost:8080/lean-recommender
+curl -d '{"properties":["local://prop/Color"],"types":[]}' http://localhost:8080/recommender
 
 ```
 
