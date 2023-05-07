@@ -176,11 +176,17 @@ func (tree *SchemaTree) SaveProtocolBuffer(writer io.Writer) error {
 	// encode propMap
 	pb_propmap := &serialization.PropMap{}
 	// first get them in order
-	props := make([]*IItem, tree.PropMap.Len())
+	props := make([]*IItem, tree.PropMap.Len()+1) // one extra for the root node
 	for _, p := range tree.PropMap.list_properties() {
 		props[int(p.SortOrder)] = p
 	}
-	//then store them in order
+	// add the root node at the end
+	if props[len(props)-1] != nil {
+		log.Panic("something is taking the space reserved for the root node!")
+	}
+	props[len(props)-1] = tree.Root.ID
+
+	//then store all in order
 	for _, p := range props {
 		pb_propmap_item := &serialization.PropMapItem{
 			Str:        *p.Str,
@@ -195,7 +201,7 @@ func (tree *SchemaTree) SaveProtocolBuffer(writer io.Writer) error {
 
 	pb_tree.MinSup = tree.MinSup
 
-	// encode root
+	// encode from root
 	var root *serialization.SchemaNode = tree.Root.AsProtoSchemaNode()
 
 	pb_tree.Root = root
@@ -247,24 +253,31 @@ func loadProtocolBuffer(in []byte) (*SchemaTree, error) {
 	// decode propMap
 	var props []*IItem
 
-	for _, pb_item := range pb_tree.PropMap.Items {
-		// This sortorder was overwritten in the gob implementation, but that seems unnecesary.
-		// sortOrder was the index in the items array, but that is already set in the item anyway
-		// item.SortOrder = uint32(sortOrder)
+	for _, pb_item := range pb_tree.PropMap.Items[:len(pb_tree.PropMap.Items)-1] { //we do not do the root node
 		asiitem := tree.PropMap.Get_or_create(pb_item.Str)
 		asiitem.TotalCount = pb_item.TotalCount
-		asiitem.SortOrder = pb_item.SortOrder
-		// TODO: check whether it is okay to have traverselpointer remaining nill
+		// This sortorder is overwritten just like in the gob implementation, but that seems unnecesary.
+		// sortOrder was the index in the items array, but that is already set in the item from Get_or_create anyway
+		// item.SortOrder = uint32(sortOrder)
+		if asiitem.SortOrder != pb_item.SortOrder {
+			log.Panic("The sort order does not seem to be consistent.")
+		}
 		props = append(props, asiitem)
 	}
 	log.Printf("%v properties... \n", len(props))
 
-	// decode MinSup
-	tree.MinSup = pb_tree.MinSup
+	// decode IItem for root
+	pb_root_item := pb_tree.PropMap.Items[len(pb_tree.PropMap.Items)-1]
+	rootItem := &IItem{&pb_root_item.Str, pb_root_item.TotalCount, pb_root_item.SortOrder, nil}
+	props = append(props, rootItem)
 
-	// decode Root
+	// decode Root, cheating the root to take its value from the last item in the props
+	pb_tree.Root.SortOrder = uint32(len(pb_tree.PropMap.Items) - 1)
 	log.Printf("decoding tree...")
 	tree.Root = *FromProtoSchemaNode(pb_tree.Root, props)
+
+	// decode MinSup
+	tree.MinSup = pb_tree.MinSup
 
 	//decode Typed
 	for _, option := range pb_tree.Options {
