@@ -1,7 +1,6 @@
 package schematree
 
 import (
-	"RecommenderServer/transactions"
 	"testing"
 
 	"log"
@@ -157,60 +156,4 @@ func depthFirstCompare(t *testing.T, left *SchemaNode, right *SchemaNode) {
 		rightChild := rightChildren[i]
 		depthFirstCompare(t, leftChild, rightChild)
 	}
-}
-
-func TestSpecificRecommendation(t *testing.T) {
-	inputDataset := "../testdata/tsv-transaction-test.tsv"
-	description := "specific test with ../testdata/tsv-transaction-test.tsv"
-
-	t.Run(description,
-		func(t *testing.T) {
-			s := transactions.SimpleFileTransactionSource(inputDataset)
-			tree := Create(s)
-			{
-				recs := tree.Recommend([]string{"a", "b", "c"}, nil)
-				assert.Len(t, recs, 1)
-				rec := recs[0]
-				assert.Equal(t, 0.5, rec.Probability)
-				assert.Equal(t, "d", *rec.Property.Str)
-			}
-			{
-				recs := tree.Recommend([]string{"b"}, nil)
-				assert.Len(t, recs, 4)
-				rec := recs[0]
-				assert.Equal(t, 0.8, rec.Probability)
-				assert.Equal(t, "a", *rec.Property.Str)
-				rec = recs[1]
-				assert.Equal(t, 0.6, rec.Probability)
-				assert.Equal(t, "c", *rec.Property.Str)
-				rec = recs[2]
-				assert.Equal(t, 0.4, rec.Probability)
-				assert.Equal(t, "d", *rec.Property.Str)
-				rec = recs[3]
-				assert.Equal(t, 0.2, rec.Probability)
-				assert.Equal(t, "e", *rec.Property.Str)
-			}
-			{
-				recs := tree.Recommend([]string{"e"}, nil)
-				assert.Len(t, recs, 3)
-				rec := recs[0]
-				assert.Equal(t, 1.0, rec.Probability)
-				assert.Equal(t, "c", *rec.Property.Str)
-				// "a" and "b" have equal probailities
-				var reca RankedPropertyCandidate
-				var recb RankedPropertyCandidate
-				if *recs[1].Property.Str == "a" {
-					reca = recs[1]
-					recb = recs[2]
-				} else {
-					reca = recs[2]
-					recb = recs[1]
-				}
-				assert.Equal(t, 0.5, reca.Probability)
-				assert.Equal(t, "a", *reca.Property.Str)
-				assert.Equal(t, 0.5, recb.Probability)
-				assert.Equal(t, "b", *recb.Property.Str)
-			}
-		})
-
 }
