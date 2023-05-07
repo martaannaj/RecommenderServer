@@ -27,8 +27,7 @@ func TestIntegration(t *testing.T) {
 
 		t.Run(description,
 			func(t *testing.T) {
-				var s transactions.TransactionSource
-				s = transactions.SimpleFileTransactionSource(inputDataset)
+				s := transactions.SimpleFileTransactionSource(inputDataset)
 
 				original_tree := Create(s)
 				allNodesHaveItem(t, &original_tree.Root)
