@@ -1,11 +1,11 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 This is the implementation of a Property Recommender Server intended for wikibase. 
-It can also be used as a general maximum likelihood recommeder as described in  [Gleim L.C. et al. (2020) SchemaTree: Maximum-Likelihood Property Recommendation for Wikidata. 
+It is a newer implementation and can also be used as a general maximum likelihood recommeder as described in  [Gleim L.C. et al. (2020) SchemaTree: Maximum-Likelihood Property Recommendation for Wikidata. 
 In: Harth A. et al. (eds) The Semantic Web. ESWC 2020. Lecture Notes in Computer Science, vol 12123. Springer, Cham](https://doi.org/10.1007/978-3-030-49461-2_11).
 
 If you find any security vulnerabilities in this project, please read [SECURITY.md](SECURITY.md) for instructions.
-Other requests, such as feature requests, or suggestions can be filed on github. We are also happy receiving pull requests. If your request is regarding the creation of the index, please file your issue at [https://github.com/lgleim/SchemaTreeRecommender](https://github.com/lgleim/SchemaTreeRecommender).
+Other requests, such as feature requests, or suggestions can be filed on github. We are also happy receiving pull requests. If your request is regarding the paper, or something related to the old index format, please file your issue at [https://github.com/lgleim/SchemaTreeRecommender](https://github.com/lgleim/SchemaTreeRecommender). 
 
 
 ## Installation
@@ -19,16 +19,16 @@ Other requests, such as feature requests, or suggestions can be filed on github.
 
 This systems works as follows
 
-1. An index, the schematree, is created from a datasource. This source can come in two forms, either a wikidata dump (json.bz2) or a tsv file (.tsv) with on each line a transaction.
-2. With this index, recommendations can be created. These can be served ising the included HTTP server.
-3. When the recommendations are not good enough (as determined using the configurable workflow), several backoff strategies can be applied to improve them. The default is the one which was deemed bast after extensive experiemantation in the abovementioned paper.
+1. An index, the schematree, is created from a datasource. This source can be provided in two forms, either a wikidata dump (json.bz2) or a tsv file (.tsv) with on each line a transaction.
+2. With this index, recommendations can be created. These can be served using the included HTTP server.
+3. When the recommendations are not good enough (as determined using the configurable workflow), several backoff strategies can be applied to improve them. The default is the one which was deemed best after extensive experiemantation in the abovementioned paper.
 
-Since creating the index from a file can take a significant amount of time, it can serialized to disk in protocol buffer format. 
+Since creating the index from a file can take a significant amount of time, it can be serialized to disk in protocol buffer format. 
 
 ## Examples
 ### Index creation ###
 
-the index is created in the same folder where the input data resides.
+The index is created in the same folder where the input data resides.
 
 Create an index from the test data example
 
