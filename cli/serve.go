@@ -17,10 +17,11 @@ import (
 
 func CommandWikiServe() *cobra.Command {
 
-	var serveOnPort int     // used by serve
+	var serveOnPort uint    // used by serve
 	var workflowFile string // used by serve
 	var certFile string     // used by serve
 	var keyFile string      // used by serve
+	var hardLimit int       // used by serve, the hard limit on the output length. -1 for no limit.
 
 	// subcommand serve
 	cmdServe := &cobra.Command{
@@ -79,7 +80,7 @@ func CommandWikiServe() *cobra.Command {
 			}
 
 			// Initiate the HTTP server. Make it stop on <Enter> press.
-			router := server.SetupEndpoints(model, workflow, 500)
+			router := server.SetupEndpoints(model, workflow, hardLimit)
 
 			var server = &http.Server{
 				Addr:              fmt.Sprintf("0.0.0.0:%v", serveOnPort),
@@ -103,9 +104,10 @@ func CommandWikiServe() *cobra.Command {
 			}
 		},
 	}
-	cmdServe.Flags().IntVarP(&serveOnPort, "port", "p", 8080, "`port` of http server")
+	cmdServe.Flags().UintVarP(&serveOnPort, "port", "p", 8080, "`port` of http server")
 	cmdServe.Flags().StringVarP(&certFile, "cert", "c", "", "the location of the certificate file (for TLS)")
 	cmdServe.Flags().StringVarP(&keyFile, "key", "k", "", "the location of the private key file (for TLS)")
 	cmdServe.Flags().StringVarP(&workflowFile, "workflow", "w", "./configuration/Workflow.json", "`path` to config file that defines the workflow")
+	cmdServe.Flags().IntVar(&hardLimit, "hard_limit", 500, "The hard limit of the number of results returned by this server, specify -1 for no limit")
 	return cmdServe
 }
