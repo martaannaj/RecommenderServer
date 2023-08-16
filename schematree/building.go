@@ -96,12 +96,19 @@ func (tree *SchemaTree) firstPass(source <-chan transactions.Transaction) {
 
 func (tree *SchemaTree) secondPass(source <-chan transactions.Transaction) {
 	log.Println("Start of the second pass")
+	// itemCount is only needed for loggin here.
+	itemCount := uint64(0)
 	var wg sync.WaitGroup
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			for transaction := range source {
+				atomic.AddUint64(&itemCount, uint64(1))
+				amount := atomic.LoadUint64(&itemCount)
+				if amount%10000 == 0 {
+					log.Printf("Processed %d entities", amount)
+				}
 				properties := make([]*IItem, 0, len(transaction))
 				for _, name := range transaction {
 					predicate, ok := tree.PropMap.noWritersGet(name)
