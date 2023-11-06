@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/google/uuid v1.3.1
 	github.com/pkg/errors v0.9.1
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4
 	gitlab.com/tozd/go/errors v0.8.0
 	gitlab.com/tozd/go/mediawiki v0.14.0
@@ -37,7 +37,6 @@ require (
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/klauspost/compress v1.17.1 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
-	github.com/microcosm-cc/bluemonday v1.0.24 // indirect
 	github.com/pingcap/errors v0.11.5-0.20210425183316-da1aaba5fb63 // indirect
 	github.com/pingcap/log v1.1.0 // indirect
 	github.com/pingcap/parser v0.0.0-20210802034743-dd9b189324ce // indirect
