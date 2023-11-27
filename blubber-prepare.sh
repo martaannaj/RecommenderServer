@@ -15,7 +15,7 @@ build_recommenderserver() {
   fi
 }
 
-export GOROOT=/usr/lib/go-1.17
+export GOROOT=/usr/lib/go-1.19
 export PATH=${GOROOT}/bin:${PATH}
 # export GOPATH=/srv/goProjects
 # export PATH=${GOPATH}/bin:${PATH}
