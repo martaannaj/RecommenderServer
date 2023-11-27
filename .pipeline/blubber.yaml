@@ -9,7 +9,7 @@ lives:
 
 variants:
   build:
-    base: docker-registry.wikimedia.org/golang1.17:latest
+    base: docker-registry.wikimedia.org/golang1.19:latest
     builder:
       command: [ ./blubber-prepare.sh ]
       requirements: [ . ]
