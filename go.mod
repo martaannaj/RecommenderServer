@@ -63,3 +63,5 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/whilp/git-urls v1.0.0 => github.com/chainguard-dev/git-urls v1.0.2
