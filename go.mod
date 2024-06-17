@@ -11,7 +11,7 @@ require (
 	github.com/stretchr/testify v1.9.0
 	gitlab.com/tozd/go/errors v0.8.1
 	gitlab.com/tozd/go/mediawiki v0.14.1
-	google.golang.org/protobuf v1.33.0
+	google.golang.org/protobuf v1.34.2
 )
 
 require (
