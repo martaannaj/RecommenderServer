@@ -124,7 +124,7 @@ func (conf *Configuration) Test() (err error) {
 	}
 	for i, lay := range conf.Layers {
 		if lay.Backoff == "" {
-			err = errors.New("Configuration File Failure: Layer %v Backoff Strategy is empty", i)
+			err = errors.Errorf("Configuration File Failure: Layer %v Backoff Strategy is empty", i)
 			return err
 		}
 		if lay.Backoff == "splitProperty" && (lay.Merger == "" || lay.Splitter == "") {
