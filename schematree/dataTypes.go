@@ -6,6 +6,8 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+
+	"fortio.org/safecast"
 )
 
 // A struct capturing
@@ -68,7 +70,7 @@ func (m propMap) Get_or_create(iri string) (item *IItem) { // TODO: Implement sa
 		if item, ok = m.prop[iri]; ok {
 			return
 		}
-		item = &IItem{&iri, 0, uint32(len(m.prop)), nil}
+		item = &IItem{&iri, 0, safecast.MustConvert[uint32](len(m.prop)), nil}
 		m.prop[iri] = item
 	}
 	return
