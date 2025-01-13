@@ -34,7 +34,7 @@ func ReadConfigFile(name *string) (conf *Configuration, err error) {
 	var c Configuration
 	file, err := os.ReadFile(*name)
 	if err != nil {
-		err = errors.Errorf("Read File failed")
+		err = errors.New("Read File failed")
 		return
 	}
 	err = json.Unmarshal(file, &c)
@@ -60,7 +60,7 @@ func ConfigToWorkflow(config *Configuration, tree *schematree.SchemaTree) (wf *s
 			cond = strategy.MakeAlwaysCondition()
 		default:
 			cond = strategy.MakeAlwaysCondition()
-			err = errors.Errorf("Condition not found: " + l.Condition)
+			err = errors.New("Condition not found: " + l.Condition)
 		}
 
 		//switch the backoffs
@@ -72,7 +72,7 @@ func ConfigToWorkflow(config *Configuration, tree *schematree.SchemaTree) (wf *s
 			case "stepsizeProportional":
 				back = strategy.MakeDeleteLowFrequencyProcedure(tree, l.ParallelExecutions, backoff.StepsizeProportional, backoff.MakeMoreThanInternalCondition(l.Threshold))
 			default:
-				err = errors.Errorf("Merger not found")
+				err = errors.New("Merger not found")
 				return
 			}
 		case "standard":
@@ -87,7 +87,7 @@ func ConfigToWorkflow(config *Configuration, tree *schematree.SchemaTree) (wf *s
 			case "avg":
 				merger = backoff.AvgMerger
 			default:
-				err = errors.Errorf("Merger not found")
+				err = errors.New("Merger not found")
 				return
 			}
 
@@ -98,7 +98,7 @@ func ConfigToWorkflow(config *Configuration, tree *schematree.SchemaTree) (wf *s
 			case "twoSupportRanges":
 				splitter = backoff.TwoSupportRangesSplitter
 			default:
-				err = errors.Errorf("Splitter not found")
+				err = errors.New("Splitter not found")
 				return
 			}
 			back = strategy.MakeSplitPropertyProcedure(tree, splitter, merger)
@@ -106,7 +106,7 @@ func ConfigToWorkflow(config *Configuration, tree *schematree.SchemaTree) (wf *s
 			cond = strategy.MakeTooFewRecommendationsCondition(l.Threshold)
 		default:
 			cond = strategy.MakeAlwaysCondition()
-			err = errors.Errorf("Backoff not found: " + l.Backoff)
+			err = errors.New("Backoff not found: " + l.Backoff)
 		}
 		//create the wf layer
 		workflow.Push(cond, back, fmt.Sprintf("layer %v", i))
@@ -119,7 +119,7 @@ func ConfigToWorkflow(config *Configuration, tree *schematree.SchemaTree) (wf *s
 // Check for correct attribution happens in configToWorkflow()
 func (conf *Configuration) Test() (err error) {
 	if len(conf.Layers) == 0 {
-		err = errors.Errorf("Configuration File Failure: No Layers Specified")
+		err = errors.New("Configuration File Failure: No Layers Specified")
 		return
 	}
 	for i, lay := range conf.Layers {

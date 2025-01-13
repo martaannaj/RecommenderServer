@@ -54,7 +54,7 @@ func WikidataDumpTransactionSource(dumpfile *mediawiki.ProcessDumpConfig) Transa
 				},
 			)
 			if errE != nil {
-				log.Panicln("Something went wrong while processing..", errE)
+				log.Panicln("Something went wrong while processing..", errE, errE.Details())
 			}
 			close(channel)
 		}()

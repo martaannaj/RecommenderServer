@@ -12,6 +12,8 @@ import (
 	"time"
 	"unsafe"
 
+	"fortio.org/safecast"
+
 	"google.golang.org/protobuf/proto"
 )
 
@@ -272,7 +274,7 @@ func loadProtocolBuffer(in []byte) (*SchemaTree, error) {
 	props = append(props, rootItem)
 
 	// decode Root, cheating the root to take its value from the last item in the props
-	pb_tree.Root.SortOrder = uint32(len(pb_tree.PropMap.Items) - 1)
+	pb_tree.Root.SortOrder = safecast.MustConvert[uint32](len(pb_tree.PropMap.Items) - 1)
 	log.Printf("decoding tree...")
 	tree.Root = *FromProtoSchemaNode(pb_tree.Root, props)
 
@@ -333,7 +335,7 @@ func Load(f io.Reader, stripURI bool) (*SchemaTree, error) {
 	}
 
 	for sortOrder, item := range props {
-		item.SortOrder = uint32(sortOrder)
+		item.SortOrder = safecast.MustConvert[uint32](sortOrder)
 		tree.PropMap.prop[*item.Str] = item
 	}
 	log.Printf("%v properties... ", len(props))

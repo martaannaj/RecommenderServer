@@ -18,12 +18,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Go 1.x in order to write go.list file
         uses: actions/setup-go@v4
         with:
-          go-version: ^1.21
+          go-version: ^1.23
       - name: WriteGoList
         run: go list -json -m all > go.list
 

@@ -9,6 +9,8 @@ import (
 	"sync/atomic"
 
 	"RecommenderServer/transactions"
+
+	"fortio.org/safecast"
 )
 
 var void struct{}
@@ -149,6 +151,6 @@ func (tree *SchemaTree) updateSortOrder() {
 	// update term's internal sortOrder
 	// Runtime: O(n), Memory: -
 	for i, v := range iList {
-		v.SortOrder = uint32(i)
+		v.SortOrder = safecast.MustConvert[uint32](i)
 	}
 }

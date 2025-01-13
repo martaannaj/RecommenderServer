@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Checkout the code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Run GoKart
         uses: kitabisa/gokart-action@v1.0.0
