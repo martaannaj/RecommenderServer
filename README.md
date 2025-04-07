@@ -10,7 +10,7 @@ Other requests, such as feature requests, or suggestions can be filed on github.
 
 ## Installation
 
-1. Install the go runtime (and VS Code + Golang tools), curently we only maintain for go v1.20
+1. Install the go runtime (and VS Code + Golang tools), curently we only maintain for go v1.23
 1. Run `go get .` in this folder to install all dependencies
 1. Run `go build .` in this folder to build the executable
 1. Optionally run `go install .` to install the executable in the $PATH
